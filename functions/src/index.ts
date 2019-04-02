@@ -9,8 +9,11 @@ const OSLO = {
 
 export const nearbyVOI = functions.https.onRequest(async (req, res) => {
   try {
-    const apiRes = await request.get(`${URL}?la=${OSLO.lat}&lo=${OSLO.long}`);
-    res.status(200).send(apiRes);
+    const apiRes: request.Response = await request.get(
+      `${URL}?la=${OSLO.lat}&lo=${OSLO.long}`
+    );
+    console.log(JSON.parse(apiRes.body));
+    res.status(200).send(JSON.parse(apiRes.body));
   } catch (e) {
     console.error(e);
     res.status(500).send(e);

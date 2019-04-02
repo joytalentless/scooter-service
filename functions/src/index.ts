@@ -12,8 +12,8 @@ export const nearbyVOI = functions.https.onRequest(async (req, res) => {
     const apiRes: request.Response = await request.get(
       `${URL}?la=${OSLO.lat}&lo=${OSLO.long}`
     );
-    console.log(JSON.parse(apiRes.body));
-    res.status(200).send(JSON.parse(apiRes.body));
+    console.log(JSON.parse(apiRes.text));
+    res.status(200).send(JSON.parse(apiRes.text));
   } catch (e) {
     console.error(e);
     res.status(500).send(e);

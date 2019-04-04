@@ -14,13 +14,13 @@ export const nearbyVOI = functions.https.onRequest(async (req, res) => {
       `${URL}?la=${OSLO.lat}&lo=${OSLO.long}`
     );
     const vehicles = JSON.parse(apiRes.text);
-    // const groups = R.groupBy((vehicle: any) => vehicle.location[0]location[0], vehicles);
 
-    const oslo = R.filter((it: any) => {
-      return R.contains('59.', R.toString(R.prop('location', it)[0]));
-    }, vehicles);
+    const oslo = R.filter(
+      (it: any) => R.contains('59.', R.toString(R.prop('location', it)[0])),
+      vehicles
+    );
 
-    console.log(`Bikes in Oslo ${JSON.stringify(oslo)}`);
+    console.log(`Bikes in Oslo ${R.length(oslo)}`);
 
     res.status(200).send(oslo);
   } catch (e) {

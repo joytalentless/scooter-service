@@ -16,12 +16,11 @@ export const nearbyVOI = functions.https.onRequest(async (req, res) => {
     const vehicles = JSON.parse(apiRes.text);
     // const groups = R.groupBy((vehicle: any) => vehicle.location[0]location[0], vehicles);
 
-    console.log('FILTERING');
     const oslo = R.filter((it: any) => {
-      console.log(`LAT: ${R.toString(R.prop('location', it)[0])}`);
-      console.log(R.contains('59', R.toString(R.prop('location', it)[0])));
       return R.contains('59', R.toString(R.prop('location', it)[0]));
     }, vehicles);
+
+    console.log(`Bikes in Oslo ${JSON.stringify(oslo)}`);
 
     res.status(200).send(oslo);
   } catch (e) {

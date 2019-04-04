@@ -16,7 +16,9 @@ export const nearbyVOI = functions.https.onRequest(async (req, res) => {
     const vehicles = JSON.parse(apiRes.text);
 
     const oslo = R.filter(
-      (it: any) => R.contains('59.', R.toString(R.prop('location', it)[0])),
+      (it: any) =>
+        R.contains('59.', R.toString(R.prop('location', it)[0])) &&
+        R.contains('10.', R.toString(R.prop('location', it)[1])),
       vehicles
     );
 

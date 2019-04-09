@@ -69,7 +69,7 @@ export const nearbyTier = functions.region('europe-west1').https.onRequest(async
     }
 });
 
-export const nearby = functions.region('europe-west1').https.onRequest(async (req, res) => {
+export const oslo = functions.region('europe-west1').https.onRequest(async (req, res) => {
     try {
         const voiResponse: request.Response = await request.get(
             `${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
@@ -110,3 +110,65 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
         res.status(500).send(e);
     }
 });
+
+export const nearby = functions.region('europe-west1').https.onRequest(async (req, res) => {
+    const lat: number = req.query.lat;
+    const lon: number = req.query.lon;
+    const range: number = req.query.range || 100;
+
+    if (lat === undefined || lon === undefined) {
+        res.status(422).send("Coordinates missing (lat and lon)");
+    }
+
+    try {
+        const voiResponse: request.Response = await request.get(
+            `${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
+        );
+        const voiAll = JSON.parse(voiResponse.text);
+        const voiOslo = voiAll.filter((v: Voi) => v.zone === 27);
+        const voi = voiOslo.filter((v: Voi) => distance(lat, lon, v.location[0], v.location[1]) < range);
+
+        const voiMapped: Vehicle[] = voi.map((v:Voi) => ({
+            id: v.id,
+            operator: 'voi',
+            lat: v.location[0],
+            lon: v.location[1],
+            code: v.short,
+            battery: v.battery
+        }));
+
+        const tierResponse: request.Response = await request
+            .get(`${tierApiUrl}`)
+            .set('x-api-key', functions.config().tier.api.key);
+
+        const tierOslo = JSON.parse(tierResponse.text).data;
+        const tier = tierOslo.filter((t: Tier) => distance(lat, lon, t.attributes.lat, t.attributes.lng) < range);
+
+        const tierMapped: Vehicle[] = tier.map((t:Tier) => ({
+            id: t.id,
+            operator: 'tier',
+            lat: t.attributes.lat,
+            lon: t.attributes.lng,
+            code: t.attributes.code,
+            battery: t.attributes.batteryLevel
+        }));
+
+        const vehicles = voiMapped.concat(tierMapped);
+
+        console.log(`Scooters in Oslo: ${vehicles.length}`);
+        res.status(200).send(vehicles);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send(e);
+    }
+});
+
+function distance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const p = 0.017453292519943295;    // Math.PI / 180
+    const c = Math.cos;
+    const a = 0.5 - c((lat2 - lat1) * p)/2 +
+        c(lat1 * p) * c(lat2 * p) *
+        (1 - c((lon2 - lon1) * p))/2;
+
+    return 12742 * Math.asin(Math.sqrt(a)) * 1000; // 2 * R; R = 6371 km
+}

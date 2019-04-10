@@ -38,8 +38,8 @@ interface Tier {
 
 export const nearbyVoi = functions.region('europe-west1').https.onRequest(async (req, res) => {
     try {
-        const apiRes: request.Response = await request.get(
-            `${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
+        const apiRes: request.Response = await request
+            .get(`${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
         );
         const vehicles = JSON.parse(apiRes.text);
         const vehiclesOslo = vehicles.filter((v: Voi) => v.zone === 27);
@@ -71,35 +71,18 @@ export const nearbyTier = functions.region('europe-west1').https.onRequest(async
 
 export const oslo = functions.region('europe-west1').https.onRequest(async (req, res) => {
     try {
-        const voiResponse: request.Response = await request.get(
-            `${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
+        const voiResponse: request.Response = await request
+            .get(`${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
         );
         const voiAll = JSON.parse(voiResponse.text);
         const voi = voiAll.filter((v: Voi) => v.zone === 27);
-
-        const voiMapped: Vehicle[] = voi.map((v:Voi) => ({
-            id: v.id,
-            operator: 'voi',
-            lat: v.location[0],
-            lon: v.location[1],
-            code: v.short,
-            battery: v.battery
-        }));
+        const voiMapped: Vehicle[] = mapVoi(voi);
 
         const tierResponse: request.Response = await request
             .get(`${tierApiUrl}`)
             .set('x-api-key', functions.config().tier.api.key);
-
         const tier = JSON.parse(tierResponse.text).data;
-
-        const tierMapped: Vehicle[] = tier.map((t:Tier) => ({
-            id: t.id,
-            operator: 'tier',
-            lat: t.attributes.lat,
-            lon: t.attributes.lng,
-            code: t.attributes.code,
-            battery: t.attributes.batteryLevel
-        }));
+        const tierMapped: Vehicle[] = mapTier(tier);
 
         const vehicles = voiMapped.concat(tierMapped);
 
@@ -121,37 +104,20 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
     }
 
     try {
-        const voiResponse: request.Response = await request.get(
-            `${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
+        const voiResponse: request.Response = await request
+            .get(`${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
         );
         const voiAll = JSON.parse(voiResponse.text);
         const voiOslo = voiAll.filter((v: Voi) => v.zone === 27);
         const voi = voiOslo.filter((v: Voi) => distance(lat, lon, v.location[0], v.location[1]) < range);
-
-        const voiMapped: Vehicle[] = voi.map((v:Voi) => ({
-            id: v.id,
-            operator: 'voi',
-            lat: v.location[0],
-            lon: v.location[1],
-            code: v.short,
-            battery: v.battery
-        }));
+        const voiMapped: Vehicle[] = mapVoi(voi);
 
         const tierResponse: request.Response = await request
             .get(`${tierApiUrl}`)
             .set('x-api-key', functions.config().tier.api.key);
-
         const tierOslo = JSON.parse(tierResponse.text).data;
         const tier = tierOslo.filter((t: Tier) => distance(lat, lon, t.attributes.lat, t.attributes.lng) < range);
-
-        const tierMapped: Vehicle[] = tier.map((t:Tier) => ({
-            id: t.id,
-            operator: 'tier',
-            lat: t.attributes.lat,
-            lon: t.attributes.lng,
-            code: t.attributes.code,
-            battery: t.attributes.batteryLevel
-        }));
+        const tierMapped: Vehicle[] = mapTier(tier);
 
         const vehicles = voiMapped.concat(tierMapped);
 
@@ -163,7 +129,7 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
     }
 });
 
-function distance(lat1: number, lon1: number, lat2: number, lon2: number) {
+function distance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const p = 0.017453292519943295;    // Math.PI / 180
     const c = Math.cos;
     const a = 0.5 - c((lat2 - lat1) * p)/2 +
@@ -171,4 +137,26 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number) {
         (1 - c((lon2 - lon1) * p))/2;
 
     return 12742 * Math.asin(Math.sqrt(a)) * 1000; // 2 * R; R = 6371 km
+}
+
+function mapVoi(voiScooters: Voi[]): Vehicle[] {
+    return voiScooters.map((v:Voi) => ({
+        id: v.id,
+        operator: 'voi',
+        lat: v.location[0],
+        lon: v.location[1],
+        code: v.short,
+        battery: v.battery
+    }));
+}
+
+function mapTier(tierScooters: Tier[]): Vehicle[] {
+    return tierScooters.map((t:Tier) => ({
+        id: t.id,
+        operator: 'tier',
+        lat: t.attributes.lat,
+        lon: t.attributes.lng,
+        code: t.attributes.code.toString(),
+        battery: t.attributes.batteryLevel
+    }));
 }

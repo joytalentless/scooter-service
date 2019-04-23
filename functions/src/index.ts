@@ -7,7 +7,7 @@ const OSLO = {
 };
 
 const voiApiUrl = 'https://api.voiapp.io/v1/vehicle/status/ready';
-const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO2';
+const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
 
 interface Vehicle {
     id: string,

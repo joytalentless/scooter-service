@@ -113,10 +113,9 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
         const voiMapped: Vehicle[] = mapVoi(voi);
 
         const tierResponse: request.Response = await request
-            .get(`${tierApiUrl}`)
+            .get(`${tierApiUrl}&lat=${lat}&lng=${lon}&radius=${range}`)
             .set('x-api-key', functions.config().tier.api.key);
-        const tierOslo = JSON.parse(tierResponse.text).data;
-        const tier = tierOslo.filter((t: Tier) => distance(lat, lon, t.attributes.lat, t.attributes.lng) < range);
+        const tier = JSON.parse(tierResponse.text).data;
         const tierMapped: Vehicle[] = mapTier(tier);
 
         const vehicles = voiMapped.concat(tierMapped);

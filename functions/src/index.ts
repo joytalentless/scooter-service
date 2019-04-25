@@ -98,6 +98,7 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
     const range: number = req.query.range || 100;
+    const max: number = req.query.max || 100;
 
     if (lat === undefined || lon === undefined) {
         res.status(422).send("Coordinates missing (lat and lon)");
@@ -119,9 +120,12 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
         const tierMapped: Vehicle[] = mapTier(tier);
 
         const vehicles = voiMapped.concat(tierMapped);
+        const closestVehicles = vehicles.sort((v1, v2) => {
+            return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
+        }).slice(0, max);
 
-        console.log(`Scooters nearby (${lat}, ${lon}, range: ${range}): ${vehicles.length}`);
-        res.status(200).send(vehicles);
+        console.log(`Scooters nearby (${lat}, ${lon}, range: ${range}, max: ${max}): ${closestVehicles.length}`);
+        res.status(200).send(closestVehicles);
     } catch (e) {
         console.error(e);
         res.status(500).send(e);

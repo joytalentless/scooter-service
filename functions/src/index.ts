@@ -120,7 +120,7 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
 
         const vehicles = voiMapped.concat(tierMapped);
 
-        console.log(`Scooters in Oslo: ${vehicles.length}`);
+        console.log(`Scooters nearby (${lat}, ${lon}, range: ${range}): ${vehicles.length}`);
         res.status(200).send(vehicles);
     } catch (e) {
         console.error(e);

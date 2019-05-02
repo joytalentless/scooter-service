@@ -1,4 +1,4 @@
-import {nearby, nearbyTier, nearbyVoi, oslo} from "./scootersInMap";
+import {nearby, nearbyTier, nearbyVoi, oslo} from "./scooters";
 import {cityBikePriceText, scooterPriceText} from "./mobilityPrices";
 
 export {

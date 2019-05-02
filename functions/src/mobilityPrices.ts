@@ -12,14 +12,14 @@ interface priceTexts {
 
 const mobilityPrices: priceTexts = {
     voi: {
-        nob: '10 kr i oppstart + 1,50 kr per min',
-        nno: '10 kr i oppstart + 1,50 kr per min',
-        eng: 'NOK 10 to unlock + NOK 1,50 per min'
-    },
-    tier: {
         nob: '10 kr i oppstart + 2 kr per min',
         nno: '10 kr i oppstart + 2 kr per min',
         eng: 'NOK 10 to unlock + NOK 2 per min'
+    },
+    tier: {
+        nob: '10 kr i oppstart + 1,50 kr per min',
+        nno: '10 kr i oppstart + 1,50 kr per min',
+        eng: 'NOK 10 to unlock + NOK 1.50 per min'
     }
 };
 

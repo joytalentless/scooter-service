@@ -1,13 +1,10 @@
 import * as functions from 'firebase-functions';
 import * as request from 'superagent';
 
-const OSLO = {
-    lat: 59.913868,
-    long: 10.752245
-};
-
-const voiApiUrl = 'https://api.voiapp.io/v1/vehicle/status/ready';
 const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
+const voiApiUrl = 'https://api.voiapp.io/v1/vehicles/zone/27/ready';
+const voiSessionKeyUrl = 'https://api.voiapp.io/v1/auth/session/';
+let voiSessionKey = '';
 
 interface Vehicle {
     id: string,
@@ -36,47 +33,9 @@ interface Tier {
     }
 }
 
-export const nearbyVoi = functions.region('europe-west1').https.onRequest(async (req, res) => {
-    try {
-        const apiRes: request.Response = await request
-            .get(`${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
-            );
-        const vehicles = JSON.parse(apiRes.text);
-        const vehiclesOslo = vehicles.filter((v: Voi) => v.zone === 27);
-
-        console.log(`Voi bikes in Oslo: ${vehiclesOslo.length}`);
-
-        res.status(200).send(vehiclesOslo);
-    } catch (e) {
-        console.error(e);
-        res.status(500).send(e);
-    }
-});
-
-export const nearbyTier = functions.region('europe-west1').https.onRequest(async (req, res) => {
-    try {
-        const apiRes: request.Response = await request
-            .get(`${tierApiUrl}`)
-            .set('x-api-key', functions.config().tier.api.key);
-        const vehicles = JSON.parse(apiRes.text);
-
-        console.log(`Tier bikes in Oslo: ${vehicles.data.length}`);
-
-        res.status(200).send(vehicles);
-    } catch (e) {
-        console.error(e);
-        res.status(500).send(e);
-    }
-});
-
 export const oslo = functions.region('europe-west1').https.onRequest(async (req, res) => {
     try {
-        const voiResponse: request.Response = await request
-            .get(`${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
-            );
-        const voiAll = JSON.parse(voiResponse.text);
-        const voi = voiAll.filter((v: Voi) => v.zone === 27);
-        const voiMapped: Vehicle[] = mapVoi(voi);
+        const voiMapped: Vehicle[] = await getVoiScooters();
 
         const tierResponse: request.Response = await request
             .get(`${tierApiUrl}`)
@@ -105,13 +64,7 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
     }
 
     try {
-        const voiResponse: request.Response = await request
-            .get(`${voiApiUrl}?la=${OSLO.lat}&lo=${OSLO.long}`
-            );
-        const voiAll = JSON.parse(voiResponse.text);
-        const voiOslo = voiAll.filter((v: Voi) => v.zone === 27);
-        const voi = voiOslo.filter((v: Voi) => distance(lat, lon, v.location[0], v.location[1]) < range);
-        const voiMapped: Vehicle[] = mapVoi(voi);
+        const voiMapped: Vehicle[] = await getVoiScooters();
 
         const tierResponse: request.Response = await request
             .get(`${tierApiUrl}&lat=${lat}&lng=${lon}&radius=${range}`)
@@ -131,6 +84,45 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
         res.status(500).send(e);
     }
 });
+
+async function getVoiScooters() {
+    try {
+        return await voiRequest();
+    } catch (err) {
+        if (err && err.status === 401) {
+            await refreshVoiSessionKey();
+            return await voiRequest();
+        } else {
+            console.error(err);
+            throw err;
+        }
+    }
+}
+
+async function voiRequest() {
+    try {
+        const voiResponse: request.Response = await request
+            .get(`${voiApiUrl}`)
+            .set('X-Access-Token', voiSessionKey);
+        const voi = JSON.parse(voiResponse.text);
+        return mapVoi(voi);
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function refreshVoiSessionKey() {
+    console.log("Refreshing VOI session key..");
+    try {
+        const res: request.Response = await request
+            .post(`${voiSessionKeyUrl}`)
+            .send({ authenticationToken: functions.config().voi.api.key });
+        voiSessionKey = JSON.parse(res.text).accessToken;
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+}
 
 function distance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const p = 0.017453292519943295;    // Math.PI / 180

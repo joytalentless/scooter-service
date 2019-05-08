@@ -56,8 +56,8 @@ export const oslo = functions.region('europe-west1').https.onRequest(async (req,
 export const nearby = functions.region('europe-west1').https.onRequest(async (req, res) => {
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
-    const range: number = req.query.range || 100;
-    const max: number = req.query.max || 100;
+    const range: number = req.query.range || 200;
+    const max: number = req.query.max || 20;
 
     if (lat === undefined || lon === undefined) {
         res.status(422).send("Coordinates missing (lat and lon)");

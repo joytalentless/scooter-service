@@ -36,13 +36,7 @@ interface Tier {
 export const oslo = functions.region('europe-west1').https.onRequest(async (req, res) => {
     try {
         const voiMapped: Vehicle[] = await getVoiScooters();
-
-        const tierResponse: request.Response = await request
-            .get(`${tierApiUrl}`)
-            .set('x-api-key', functions.config().tier.api.key);
-        const tier = JSON.parse(tierResponse.text).data;
-        const tierMapped: Vehicle[] = mapTier(tier);
-
+        const tierMapped: Vehicle[] = await getTierScooters();
         const vehicles = voiMapped.concat(tierMapped);
 
         console.log(`Scooters in Oslo: ${vehicles.length}`);
@@ -65,14 +59,9 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
 
     try {
         const voiMapped: Vehicle[] = await getVoiScooters();
-
-        const tierResponse: request.Response = await request
-            .get(`${tierApiUrl}&lat=${lat}&lng=${lon}&radius=${range}`)
-            .set('x-api-key', functions.config().tier.api.key);
-        const tier = JSON.parse(tierResponse.text).data;
-        const tierMapped: Vehicle[] = mapTier(tier);
-
+        const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
         const vehicles = voiMapped.concat(tierMapped);
+
         const closestVehicles = vehicles.sort((v1, v2) => {
             return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
         }).slice(0, max);
@@ -96,6 +85,23 @@ async function getVoiScooters() {
             console.error(err);
             throw err;
         }
+    }
+}
+
+async function getTierScooters(lat?: number, lon?: number, range?: number) {
+    let url: string = tierApiUrl;
+    if (lat && lon && range) {
+        url = `${tierApiUrl}&lat=${lat}&lng=${lon}&radius=${range}`;
+    }
+
+    try {
+        const tierResponse: request.Response = await request
+            .get(`${url}`)
+            .set('x-api-key', functions.config().tier.api.key);
+        const tier = JSON.parse(tierResponse.text).data;
+        return mapTier(tier);
+    } catch (err) {
+        throw err;
     }
 }
 

@@ -289,11 +289,6 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.45.tgz#4c49ba34106bc7dced77ff6bae8eb6543cde8351"
   integrity sha512-tGVTbA+i3qfXsLbq9rEq/hezaHY55QxQLeXQL2ejNgFAxxrgu8eMmYIOsRcl7hN1uTLVsKOOYacV/rcJM3sfgQ==
 
-"@types/ramda@^0.26.6":
-  version "0.26.6"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.26.6.tgz#1aaf5060da8ebb99529420b6eb997c50f74c218e"
-  integrity sha512-AmTHEkGo/EEufYY7MRqlgI0HLsLiAnc02pKOTVzE2D9IHf6yH2Xz71ompfEnduuaFGplYrtIOFOUOLs0AbMj9Q==
-
 "@types/range-parser@*":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
@@ -917,10 +912,10 @@ firebase-admin@~7.0.0:
     "@google-cloud/firestore" "^1.0.1"
     "@google-cloud/storage" "^2.3.0"
 
-firebase-functions@^2.2.0:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/firebase-functions/-/firebase-functions-2.2.1.tgz#f5b6de47860819eb8d41b969c8d6d2c1000dc422"
-  integrity sha512-k2FA3j8XFGPOGBjgKoBUQQc4Hfqe4PdcG8hfS/RHireW1vQhkplx8XhzaknJNqsBCIoglMFuUsXpuAh9pbhtxw==
+firebase-functions@^2.3.0:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/firebase-functions/-/firebase-functions-2.3.1.tgz#6ad741cb5f38f4ed1a679607ffdbec68fa11127f"
+  integrity sha512-MPeuzGFLS63VqfGErgf+kbZinXE4SoK+jxXh1NBWrjYUjXlOJBKRmVNAFJoQB8wzCvOtBuDYjGcnBNz6sKXsfw==
   dependencies:
     "@types/cors" "^2.8.1"
     "@types/express" "^4.11.1"
@@ -1732,11 +1727,6 @@ qs@^6.7.0:
   version "6.7.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.7.0.tgz#41dc1a015e3d581f1621776be31afb2876a9b1bc"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
-
-ramda@^0.26.1:
-  version "0.26.1"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
-  integrity sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==
 
 range-parser@~1.2.0:
   version "1.2.0"

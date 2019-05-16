@@ -1,9 +1,8 @@
-import {nearby, oslo} from "./scooters";
+import {nearby} from "./scooters";
 import {cityBikePriceText, scooterPriceText} from "./mobilityPrices";
 
 export {
     nearby,
-    oslo,
     scooterPriceText,
     cityBikePriceText
 }

@@ -2,50 +2,46 @@ import * as functions from 'firebase-functions';
 import * as request from 'superagent';
 
 const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
+const flashApiUrl = 'https://api.goflash.com/api/Mobile/Scooters';
 const voiApiUrl = 'https://api.voiapp.io/v1/vehicles/zone/27/ready';
 const voiSessionKeyUrl = 'https://api.voiapp.io/v1/auth/session/';
 let voiSessionKey = '';
 
 interface Vehicle {
-    id: string,
-    operator: string,
-    lat: number,
-    lon: number,
-    code: string,
+    id: string
+    operator: string
+    lat: number
+    lon: number
+    code: string
     battery: number
 }
 
 interface Voi {
-    id: string,
-    location: number[],
-    short: string,
-    battery: number,
-    zone: number
+    id: string
+    location: number[]
+    short: string
+    battery: number
 }
 
 interface Tier {
-    id: string;
+    id: string
     attributes: {
-        lat: number,
-        lng: number,
-        code: number,
+        lat: number
+        lng: number
+        code: number
         batteryLevel: number
     }
 }
 
-export const oslo = functions.region('europe-west1').https.onRequest(async (req, res) => {
-    try {
-        const voiMapped: Vehicle[] = await getVoiScooters();
-        const tierMapped: Vehicle[] = await getTierScooters();
-        const vehicles = voiMapped.concat(tierMapped);
-
-        console.log(`Scooters in Oslo: ${vehicles.length}`);
-        res.status(200).send(vehicles);
-    } catch (e) {
-        console.error(e);
-        res.status(500).send(e);
+interface Flash {
+    idScooter: string
+    ScooterCode: string
+    location: {
+        latitude: number
+        longitude: number
     }
-});
+    PowerPercentInt: number
+}
 
 export const nearby = functions.region('europe-west1').https.onRequest(async (req, res) => {
     const lat: number = req.query.lat;
@@ -60,9 +56,11 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
     try {
         const voiMapped: Vehicle[] = await getVoiScooters();
         const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
-        const vehicles = voiMapped.concat(tierMapped);
+        const flashMapped: Vehicle[] = await getFlashScooters(lat, lon);
 
-        const closestVehicles = vehicles.sort((v1, v2) => {
+        const vehicles: Vehicle[] = new Array<Vehicle>().concat(voiMapped, tierMapped, flashMapped);
+
+        const closestVehicles: Vehicle[] = vehicles.sort((v1, v2) => {
             return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
         }).slice(0, max);
 
@@ -73,20 +71,6 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
         res.status(500).send(e);
     }
 });
-
-async function getVoiScooters() {
-    try {
-        return await voiRequest();
-    } catch (err) {
-        if (err && err.status === 401) {
-            await refreshVoiSessionKey();
-            return await voiRequest();
-        } else {
-            console.error(err);
-            throw err;
-        }
-    }
-}
 
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
     let url: string = tierApiUrl;
@@ -102,6 +86,31 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
         return mapTier(tier);
     } catch (err) {
         throw err;
+    }
+}
+
+async function getFlashScooters(lat: number, lon: number) {
+    try {
+        const flashResponse: request.Response = await request
+            .get(`${flashApiUrl}?lang=en&userLatitude=${lat}&userLongitude=${lon}&latitude=${lat}&longitude=${lon}&latitudeDelta=0.01&longitudeDelta=0.01`);
+        const flash = JSON.parse(flashResponse.text).Data.Scooters;
+        return mapFlash(flash);
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function getVoiScooters() {
+    try {
+        return await voiRequest();
+    } catch (err) {
+        if (err && err.status === 401) {
+            await refreshVoiSessionKey();
+            return await voiRequest();
+        } else {
+            console.error(err);
+            throw err;
+        }
     }
 }
 
@@ -159,5 +168,16 @@ function mapTier(tierScooters: Tier[]): Vehicle[] {
         lon: t.attributes.lng,
         code: t.attributes.code.toString(),
         battery: t.attributes.batteryLevel
+    }));
+}
+
+function mapFlash(flashScooters: Flash[]): Vehicle[] {
+    return flashScooters.map((f: Flash) => ({
+        id: f.idScooter,
+        operator: 'flash',
+        lat: f.location.latitude,
+        lon: f.location.longitude,
+        code: f.ScooterCode,
+        battery: f.PowerPercentInt
     }));
 }

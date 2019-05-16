@@ -76,3 +76,4 @@ typings/
 
 node_modules/
 .runtimeconfig.json
+.docz

@@ -1,0 +1,16 @@
+---
+name: Authentication
+---
+
+# Authentication
+The API is publically available through the [NLOD licence](https://data.norge.no/nlod/no), 
+however, it is required that all consumers identify themselves by using the header 
+`ET-Client-Name`. Entur will deploy strict rate-limiting policies on API-consumers 
+who do not identify themselves with a header, and reserves the right to block 
+unidentified consumers. The structure of the value of `ET-Client-Name` should be: 
+"company - application"
+
+Header examples:
+- "brakar - journeyplanner"
+- "fosen_utvikling - infoplakat"
+- "norway_bussekspress - reiseplanlegger"

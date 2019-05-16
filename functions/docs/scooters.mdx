@@ -1,0 +1,43 @@
+---
+name: Scooters
+---
+
+# Scooters
+
+## Find all scooters near a coordinate
+This endpoint returns all scooters near a specified coordinate (latitude and longitude), 
+sorted by their distance to the coordinate. You can limit the results with a range (radius)
+from the coordinate, and by the maximum number of scooters you wish to receive.
+
+### HTTP Request
+`GET https://developer.entur.org/mobility/scooters/nearby?lat=59.909&lon=10.746`
+
+### Query parameters
+| Parameter | Description                           | Example       |
+|:--------- |:------------------------------------- |:------------- |
+| lat       | Latitude                              | 59.909        |
+| lon       | Longitude                             | 10.746        |
+| range     | Radius in meters (optional)           | 200 (default) |
+| max       | Maximum number of scooters (optional) | 20 (default)  |
+
+### Example response
+```
+[
+     {
+         "id": "0749d00d-7ba8-1337-b501-ca07b33f6659",
+         "operator": "toot-n-scoot",
+         "lat": 59.908778,
+         "lon": 10.746091,
+         "code": "20013",
+         "battery": 75
+     },
+     {
+         "id": "69319",
+         "operator": "byke",
+         "lat": 59.908843,
+         "lon": 10.7449,
+         "code": "AXFD",
+         "battery": 77
+     }
+]
+```

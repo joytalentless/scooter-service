@@ -34,7 +34,7 @@ interface Tier {
 }
 
 interface Flash {
-    idScooter: string
+    idScooter: number
     ScooterCode: string
     location: {
         latitude: number
@@ -173,7 +173,7 @@ function mapTier(tierScooters: Tier[]): Vehicle[] {
 
 function mapFlash(flashScooters: Flash[]): Vehicle[] {
     return flashScooters.map((f: Flash) => ({
-        id: f.idScooter,
+        id: f.idScooter.toString(),
         operator: 'flash',
         lat: f.location.latitude,
         lon: f.location.longitude,

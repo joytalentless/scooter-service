@@ -49,8 +49,9 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
     const range: number = req.query.range || 200;
     const max: number = req.query.max || 20;
 
-    if (lat === undefined || lon === undefined) {
+    if (!lat || !lon) {
         res.status(422).send("Coordinates missing (lat and lon)");
+        return;
     }
 
     try {
@@ -85,7 +86,8 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);
     } catch (err) {
-        throw err;
+        console.error(err);
+        return [];
     }
 }
 
@@ -96,7 +98,8 @@ async function getFlashScooters(lat: number, lon: number) {
         const flash = JSON.parse(flashResponse.text).Data.Scooters;
         return mapFlash(flash);
     } catch (err) {
-        throw err;
+        console.error(err);
+        return [];
     }
 }
 
@@ -105,11 +108,16 @@ async function getVoiScooters() {
         return await voiRequest();
     } catch (err) {
         if (err && err.status === 401) {
-            await refreshVoiSessionKey();
-            return await voiRequest();
+            try {
+                await refreshVoiSessionKey();
+                return await voiRequest();
+            } catch (e) {
+                console.error(e);
+                return [];
+            }
         } else {
             console.error(err);
-            throw err;
+            return [];
         }
     }
 }
@@ -135,7 +143,6 @@ async function refreshVoiSessionKey() {
         voiSessionKey = JSON.parse(res.text).accessToken;
     } catch (err) {
         console.error(err);
-        throw err;
     }
 }
 

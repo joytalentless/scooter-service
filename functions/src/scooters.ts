@@ -43,7 +43,7 @@ interface Flash {
     PowerPercentInt: number
 }
 
-export const nearby = functions.region('europe-west1').https.onRequest(async (req, res) => {
+export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
     const range: number = req.query.range || 200;
@@ -72,6 +72,8 @@ export const nearby = functions.region('europe-west1').https.onRequest(async (re
         res.status(500).send(e);
     }
 });
+
+export const nearby = scooters; // Alias for backwards compatibility
 
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
     let url: string = tierApiUrl;

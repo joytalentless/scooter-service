@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy name="mobility">
+    <Description>mobility</Description>
+    <DisplayName>mobility</DisplayName>
+   <Policies>
+        <Policy>assignMessage.addCors</Policy>
+        <Policy>flowCallout.getEnvironmentConfiguration</Policy>
+        <Policy>flowCalloutreplaceTargetUrl</Policy>
+        <Policy>spikeArrest</Policy>
+        <Policy>flowCallout.generalSecurityHeaders</Policy>
+    </Policies>
+    <ProxyEndpoints>
+        <ProxyEndpoint>mobility-v1</ProxyEndpoint>
+    </ProxyEndpoints>
+    <Resources/>
+    <Spec></Spec>
+    <TargetServers/>
+    <TargetEndpoints>
+        <TargetEndpoint>mobility-v1</TargetEndpoint>
+    </TargetEndpoints>
+</APIProxy>

@@ -2,7 +2,6 @@ import * as functions from 'firebase-functions';
 import * as request from 'superagent';
 
 const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
-const flashApiUrl = 'https://api.goflash.com/api/Mobile/Scooters';
 const voiApiUrl = 'https://api.voiapp.io/v1/vehicles/zone/27/ready';
 const voiSessionKeyUrl = 'https://api.voiapp.io/v1/auth/session/';
 let voiSessionKey = '';
@@ -33,16 +32,6 @@ interface Tier {
     }
 }
 
-interface Flash {
-    idScooter: number
-    ScooterCode: string
-    location: {
-        latitude: number
-        longitude: number
-    }
-    PowerPercentInt: number
-}
-
 export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
@@ -57,9 +46,8 @@ export const scooters = functions.region('europe-west1').https.onRequest(async (
     try {
         const voiMapped: Vehicle[] = await getVoiScooters();
         const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
-        const flashMapped: Vehicle[] = await getFlashScooters(lat, lon);
 
-        const vehicles: Vehicle[] = new Array<Vehicle>().concat(voiMapped, tierMapped, flashMapped);
+        const vehicles: Vehicle[] = new Array<Vehicle>().concat(voiMapped, tierMapped);
 
         const closestVehicles: Vehicle[] = vehicles.sort((v1, v2) => {
             return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
@@ -87,18 +75,6 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
             .set('x-api-key', functions.config().tier.api.key);
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);
-    } catch (err) {
-        console.error(err);
-        return [];
-    }
-}
-
-async function getFlashScooters(lat: number, lon: number) {
-    try {
-        const flashResponse: request.Response = await request
-            .get(`${flashApiUrl}?lang=en&userLatitude=${lat}&userLongitude=${lon}&latitude=${lat}&longitude=${lon}&latitudeDelta=0.01&longitudeDelta=0.01`);
-        const flash = JSON.parse(flashResponse.text).Data.Scooters;
-        return mapFlash(flash);
     } catch (err) {
         console.error(err);
         return [];
@@ -180,13 +156,3 @@ function mapTier(tierScooters: Tier[]): Vehicle[] {
     }));
 }
 
-function mapFlash(flashScooters: Flash[]): Vehicle[] {
-    return flashScooters.map((f: Flash) => ({
-        id: f.idScooter.toString(),
-        operator: 'flash',
-        lat: f.location.latitude,
-        lon: f.location.longitude,
-        code: f.ScooterCode,
-        battery: f.PowerPercentInt
-    }));
-}

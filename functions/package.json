@@ -6,11 +6,12 @@
         "serve": "yarn run build && firebase serve --only functions",
         "shell": "yarn run build && firebase functions:shell",
         "start": "yarn run shell",
-        "deploy": "firebase deploy --only functions -P",
+        "deploy-prod": "firebase deploy --only functions -P entur-mobility && yarn upload-docs",
         "stage": "firebase deploy --only functions -P entur-mobility-staging",
         "logs": "firebase functions:log",
         "docz:dev": "docz dev",
-        "docz:build": "docz build"
+        "docz:build": "docz build",
+        "upload-docs": "rsync -R **/*.mdx temp-docs && gsutil -m rsync -d -r temp-docs gs://entur-docs.appspot.com/mobility && rm -rf temp-docs"
     },
     "main": "lib/index.js",
     "dependencies": {

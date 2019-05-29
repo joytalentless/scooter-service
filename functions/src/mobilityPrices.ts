@@ -24,8 +24,8 @@ const mobilityPrices: priceTexts = {
 };
 
 const osloBergenTrondheim : priceText = {
-    nob: '399 kr for sesongspass / 49 kr for dagspass',
-    nno: '399 kr for sesongspass / 49 kr for dagspass',
+    nob: '399 kr for sesongpass / 49 kr for dagspass',
+    nno: '399 kr for sesongpass / 49 kr for dagspass',
     eng: 'NOK 399 for season pass / NOK 49 for day pass'
 };
 
@@ -34,7 +34,7 @@ const cityBikePrices: priceTexts = {
     bergen: osloBergenTrondheim,
     trondheim: osloBergenTrondheim,
     drammen: {
-        nob: '130 kr for sesongspass',
+        nob: '130 kr for sesongpass',
         nno: '130 kr for sesongpass',
         eng: 'NOK 130 for season pass'
     },

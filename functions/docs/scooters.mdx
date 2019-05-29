@@ -6,12 +6,22 @@ menu: Mobility
 # Scooters
 
 ## Find all scooters near a coordinate
-This endpoint returns all scooters near a specified coordinate (latitude and longitude), 
+This endpoint returns all scooters near a specified coordinate (latitude and longitude),
 sorted by their distance to the coordinate. You can limit the results with a range (radius)
 from the coordinate, and by the maximum number of scooters you wish to receive.
 
 ### HTTP Request
 `GET https://api.entur.io/mobility/v1/scooters?lat=59.909&lon=10.746`
+
+<Expandable title="Try it!">
+    <RestTester
+        url="https://api.entur.io/mobility/v1/scooters"
+        queryParameters={[
+            { name: 'lat', type: 'number', defaultValue: '59.909' },
+            { name: 'lon', type: 'number', defaultValue: '10.746' },
+        ]}
+    />
+</Expandable>
 
 ### Query parameters
 | Parameter | Description                           | Example       |

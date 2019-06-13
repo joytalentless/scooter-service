@@ -1,6 +1,9 @@
 import * as functions from 'firebase-functions';
 import * as request from 'superagent';
 
+const CLIENT_HEADER_NAME: string = 'ET-Client-Name';
+const CLIENT_ENTUR: string = 'entur-client-app';
+
 const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
 const voiApiUrl = 'https://api.voiapp.io/v1/vehicles/zone/27/ready';
 const voiSessionKeyUrl = 'https://api.voiapp.io/v1/auth/session/';
@@ -42,6 +45,8 @@ export const scooters = functions.region('europe-west1').https.onRequest(async (
         res.status(422).send("Coordinates missing (lat and lon)");
         return;
     }
+
+    logClientName(req.get(CLIENT_HEADER_NAME));
 
     try {
         const voiMapped: Vehicle[] = await getVoiScooters();
@@ -156,3 +161,12 @@ function mapTier(tierScooters: Tier[]): Vehicle[] {
     }));
 }
 
+function logClientName(client: string | undefined): void {
+    if (!client) {
+        console.log(`ET-Client-Name missing!`);
+    }
+
+    if (client && !client.startsWith(CLIENT_ENTUR)) {
+        console.log(`ET-Client-Name: ${client}`);
+    }
+}

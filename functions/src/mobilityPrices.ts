@@ -10,20 +10,20 @@ interface priceTexts {
     [key: string]: priceText
 }
 
-const mobilityPrices: priceTexts = {
+const scooterPrices: priceTexts = {
     voi: {
-        nob: '10 kr i oppstart + 2 kr per min',
-        nno: '10 kr i oppstart + 2 kr per min',
-        eng: 'NOK 10 to unlock + NOK 2 per min'
+        nob: '10 kr i oppstart + 3 kr per min',
+        nno: '10 kr i oppstart + 3 kr per min',
+        eng: 'NOK 10 to unlock + NOK 3 per min'
     },
     tier: {
-        nob: '10 kr i oppstart + 1,50 kr per min',
-        nno: '10 kr i oppstart + 1,50 kr per min',
-        eng: 'NOK 10 to unlock + NOK 1.50 per min'
+        nob: '10 kr i oppstart + 1,90 kr per min',
+        nno: '10 kr i oppstart + 1,90 kr per min',
+        eng: 'NOK 10 to unlock + NOK 1.90 per min'
     }
 };
 
-const osloBergenTrondheim : priceText = {
+const osloBergenTrondheim: priceText = {
     nob: '399 kr for sesongpass / 49 kr for dagspass',
     nno: '399 kr for sesongpass / 49 kr for dagspass',
     eng: 'NOK 399 for season pass / NOK 49 for day pass'
@@ -45,12 +45,14 @@ const cityBikePrices: priceTexts = {
     }
 };
 
-export const scooterPriceText = functions.region('europe-west1').https
-    .onRequest(async (req, res) => {
-        res.status(200).send(mobilityPrices);
-    });
+export const scooterPriceText = functions.region('europe-west1').https.onRequest(async (req, res) => {
+    res.status(200).send(scooterPrices);
+});
 
-export const cityBikePriceText = functions.region('europe-west1').https
-    .onRequest(async (req, res) => {
-        res.status(200).send(cityBikePrices)
-    });
+export const cityBikePriceText = functions.region('europe-west1').https.onRequest(async (req, res) => {
+    res.status(200).send(cityBikePrices)
+});
+
+export const prices = functions.region('europe-west1').https.onRequest(async (req, res) => {
+    res.status(200).send({scooters: scooterPrices, cityBikes: cityBikePrices});
+});

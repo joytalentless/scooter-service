@@ -20,6 +20,11 @@ const scooterPrices: priceTexts = {
         nob: '10 kr i oppstart + 1,90 kr per min',
         nno: '10 kr i oppstart + 1,90 kr per min',
         eng: 'NOK 10 to unlock + NOK 1.90 per min'
+    },
+    zvipp: {
+        nob: '10 kr i oppstart + 2 kr per min',
+        nno: '10 kr i oppstart + 2 kr per min',
+        eng: 'NOK 10 to unlock + NOK 2 per min'
     }
 };
 

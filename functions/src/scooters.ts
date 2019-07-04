@@ -8,6 +8,7 @@ const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
 const voiApiUrl = 'https://api.voiapp.io/v1/vehicles/zone/27/ready';
 const voiSessionKeyUrl = 'https://api.voiapp.io/v1/auth/session/';
 let voiSessionKey = '';
+const zvippApiUrl = 'https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=60';
 
 interface Vehicle {
     id: string
@@ -35,6 +36,15 @@ interface Tier {
     }
 }
 
+interface Zvipp {
+    bike_id: number
+    operator: string
+    latitude: string
+    longitude: string
+    is_reserved: boolean
+    is_disabled: boolean
+}
+
 export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
@@ -51,8 +61,9 @@ export const scooters = functions.region('europe-west1').https.onRequest(async (
     try {
         const voiMapped: Vehicle[] = await getVoiScooters();
         const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
+        const zvippMapped: Vehicle[] = await getZvippScooters();
 
-        const vehicles: Vehicle[] = new Array<Vehicle>().concat(voiMapped, tierMapped);
+        const vehicles: Vehicle[] = new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped);
 
         const closestVehicles: Vehicle[] = vehicles.sort((v1, v2) => {
             return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
@@ -129,6 +140,18 @@ async function refreshVoiSessionKey() {
     }
 }
 
+async function getZvippScooters() {
+    try {
+        const zvippResponse: request.Response = await request
+            .get(`${zvippApiUrl}`);
+        const zvipp: Zvipp[] = JSON.parse(zvippResponse.text).data.en.bikes;
+        return mapZvipp(zvipp.filter(z => !z.is_disabled && !z.is_reserved));
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
 function distance(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const p = 0.017453292519943295;    // Math.PI / 180
     const c = Math.cos;
@@ -158,6 +181,17 @@ function mapTier(tierScooters: Tier[]): Vehicle[] {
         lon: t.attributes.lng,
         code: t.attributes.code.toString(),
         battery: t.attributes.batteryLevel
+    }));
+}
+
+function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
+    return zvippScooters.map((z: Zvipp) => ({
+        id: z.bike_id.toString(),
+        operator: 'zvipp',
+        lat: Number(z.latitude),
+        lon: Number(z.longitude),
+        code: z.bike_id.toString(),
+        battery: 50
     }));
 }
 

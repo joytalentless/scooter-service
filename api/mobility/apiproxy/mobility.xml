@@ -7,7 +7,6 @@
         <Policy>flowCallout.getEnvironmentConfiguration</Policy>
         <Policy>flowCalloutreplaceTargetUrl</Policy>
         <Policy>spikeArrest</Policy>
-        <Policy>flowCallout.generalSecurityHeaders</Policy>
     </Policies>
     <ProxyEndpoints>
         <ProxyEndpoint>mobility-v1</ProxyEndpoint>

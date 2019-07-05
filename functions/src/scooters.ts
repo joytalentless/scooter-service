@@ -43,6 +43,9 @@ interface Zvipp {
     longitude: string
     is_reserved: boolean
     is_disabled: boolean
+    'qr-code': string
+    battery: number
+
 }
 
 export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
@@ -190,8 +193,8 @@ function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
         operator: 'zvipp',
         lat: Number(z.latitude),
         lon: Number(z.longitude),
-        code: z.bike_id.toString(),
-        battery: 50
+        code: z['qr-code'],
+        battery: z.battery
     }));
 }
 

@@ -1,4 +1,5 @@
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 import * as request from 'superagent';
 
 const CLIENT_HEADER_NAME: string = 'ET-Client-Name';
@@ -45,8 +46,10 @@ interface Zvipp {
     is_disabled: boolean
     'qr-code': string
     battery: number
-
 }
+
+admin.initializeApp(functions.config().firebase);
+const db = admin.firestore();
 
 export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
     const lat: number = req.query.lat;
@@ -62,12 +65,7 @@ export const scooters = functions.region('europe-west1').https.onRequest(async (
     logClientName(req.get(CLIENT_HEADER_NAME));
 
     try {
-        const voiMapped: Vehicle[] = await getVoiScooters();
-        const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
-        const zvippMapped: Vehicle[] = await getZvippScooters();
-
-        const vehicles: Vehicle[] = new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped);
-
+        const vehicles: Vehicle[] = await getScooters(lat, lon, range);
         const closestVehicles: Vehicle[] = vehicles.sort((v1, v2) => {
             return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
         }).slice(0, max);
@@ -80,7 +78,28 @@ export const scooters = functions.region('europe-west1').https.onRequest(async (
     }
 });
 
+async function getScooters(lat: number, lon: number, range: number) {
+    const voiMapped: Vehicle[] = await getVoiScooters();
+    const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
+    const zvippMapped: Vehicle[] = await getZvippScooters();
+
+    return new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped);
+}
+
 export const nearby = scooters; // Alias for backwards compatibility
+
+export const bigDataDump = functions.region('europe-west1').pubsub.schedule('every 1 hours').onRun(async () => {
+    if (toggles() && toggles().bigdatadump === 'on') {
+        const allScooters: Vehicle[] = await getScooters(59.9, 10.7, 10000);
+        console.log(`Number of scooters: ${allScooters.length}`);
+        const data = allScooters.map(s => ({operator: s.operator, lat: s.lat, lon: s.lon}));
+
+        const entry = db.collection('scooters').doc(new Date().toISOString());
+        await entry.set({data});
+    } else {
+        console.log('BigDataDump is off')
+    }
+});
 
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
     let url: string = tierApiUrl;
@@ -206,4 +225,8 @@ function logClientName(client: string | undefined): void {
     if (client && !client.startsWith(CLIENT_ENTUR)) {
         console.log(`ET-Client-Name: ${client}`);
     }
+}
+
+function toggles() {
+    return functions.config().toggles
 }

@@ -16,8 +16,8 @@
     "main": "lib/index.js",
     "dependencies": {
         "@types/superagent": "^4.1.1",
-        "firebase-admin": "~7.0.0",
-        "firebase-functions": "3.1.0",
+        "firebase-admin": "8.2.0",
+        "firebase-functions": "3.2.0",
         "superagent": "^5.0.2"
     },
     "devDependencies": {

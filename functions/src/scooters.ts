@@ -89,7 +89,7 @@ async function getScooters(lat: number, lon: number, range: number) {
 export const nearby = scooters; // Alias for backwards compatibility
 
 export const bigDataDump = functions.region('europe-west1').pubsub.schedule('every 1 hours').onRun(async () => {
-    if (toggles() && toggles().bigdatadump === 'on') {
+    if (toggles().bigdatadump === 'on') {
         const allScooters: Vehicle[] = await getScooters(59.9, 10.7, 10000);
         console.log(`Number of scooters: ${allScooters.length}`);
         const data = allScooters.map(s => ({operator: s.operator, lat: s.lat, lon: s.lon}));
@@ -102,6 +102,11 @@ export const bigDataDump = functions.region('europe-west1').pubsub.schedule('eve
 });
 
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
+    if (toggles().tier === 'off') {
+        console.log('Tier is toggled off');
+        return [];
+    }
+
     let url: string = tierApiUrl;
     if (lat && lon && range) {
         url = `${tierApiUrl}&lat=${lat}&lng=${lon}&radius=${range}`;
@@ -120,6 +125,11 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
 }
 
 async function getVoiScooters() {
+    if (toggles().voi === 'off') {
+        console.log('Voi is toggled off');
+        return [];
+    }
+
     try {
         return await voiRequest();
     } catch (err) {
@@ -163,6 +173,11 @@ async function refreshVoiSessionKey() {
 }
 
 async function getZvippScooters() {
+    if (toggles().zvipp === 'off') {
+        console.log('Zvipp is toggled off');
+        return [];
+    }
+
     try {
         const zvippResponse: request.Response = await request
             .get(`${zvippApiUrl}`);
@@ -228,5 +243,5 @@ function logClientName(client: string | undefined): void {
 }
 
 function toggles() {
-    return functions.config().toggles
+    return functions.config().toggles || {}
 }

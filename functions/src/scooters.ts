@@ -6,8 +6,8 @@ const CLIENT_HEADER_NAME: string = 'ET-Client-Name';
 const CLIENT_ENTUR: string = 'entur-client-app';
 
 const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
-const voiApiUrl = 'https://api.voiapp.io/v1/vehicles/zone/27/ready';
-const voiSessionKeyUrl = 'https://api.voiapp.io/v1/auth/session/';
+const voiApiUrl = 'https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status';
+const voiSessionKeyUrl = 'https://mds.voiapp.io/token';
 let voiSessionKey = '';
 const zvippApiUrl = 'https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=60';
 
@@ -21,10 +21,11 @@ interface Vehicle {
 }
 
 interface Voi {
-    id: string
-    location: number[]
-    short: string
-    battery: number
+    bike_id: string
+    lat: number
+    lon: number
+    is_reserved: boolean
+    is_disabled: boolean
 }
 
 interface Tier {
@@ -152,9 +153,10 @@ async function voiRequest() {
     try {
         const voiResponse: request.Response = await request
             .get(`${voiApiUrl}`)
-            .set('X-Access-Token', voiSessionKey);
-        const voi = JSON.parse(voiResponse.text);
-        return mapVoi(voi);
+            .set('Authorization', `Bearer ${voiSessionKey}`)
+            .set('Accept', 'application/vnd.mds.provider+json;version=0.3');
+        const voi: Voi[] = JSON.parse(voiResponse.text).data.bikes;
+        return mapVoi(voi.filter(v => !v.is_disabled && !v.is_reserved));
     } catch (err) {
         throw err;
     }
@@ -165,8 +167,11 @@ async function refreshVoiSessionKey() {
     try {
         const res: request.Response = await request
             .post(`${voiSessionKeyUrl}`)
-            .send({ authenticationToken: functions.config().voi.api.key });
-        voiSessionKey = JSON.parse(res.text).accessToken;
+            .auth(functions.config().voi.api.user, functions.config().voi.api.pass)
+            .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
+            .set('Content-Type', 'application/x-www-form-urlencoded')
+            .send('grant_type=client_credentials');
+        voiSessionKey = JSON.parse(res.text).access_token;
     } catch (err) {
         console.error(err);
     }
@@ -201,12 +206,12 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number): numbe
 
 function mapVoi(voiScooters: Voi[]): Vehicle[] {
     return voiScooters.map((v: Voi) => ({
-        id: v.id,
+        id: v.bike_id,
         operator: 'voi',
-        lat: v.location[0],
-        lon: v.location[1],
-        code: v.short,
-        battery: v.battery
+        lat: v.lat,
+        lon: v.lon,
+        code: '-',
+        battery: 70
     }));
 }
 

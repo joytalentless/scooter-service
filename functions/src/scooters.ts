@@ -42,8 +42,8 @@ interface Tier {
 interface Zvipp {
     bike_id: number
     operator: string
-    latitude: string
-    longitude: string
+    lat: string
+    lon: string
     is_reserved: boolean
     is_disabled: boolean
     'qr-code': string
@@ -187,11 +187,11 @@ async function getZvippScooters() {
     try {
         const zvippOsloResponse: request.Response = await request
             .get(`${zvippApiUrlOslo}`);
-        const zvippOslo: Zvipp[] = JSON.parse(zvippOsloResponse.text).data.en.bikes;
+        const zvippOslo: Zvipp[] = JSON.parse(zvippOsloResponse.text).data.bikes;
 
         const zvippDrammenResponse: request.Response = await request
             .get(`${zvippApiUrlDrammen}`);
-        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data.en.bikes;
+        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data.bikes;
 
         return mapZvipp(zvippOslo.concat(zvippDrammen).filter(z => !z.is_disabled && !z.is_reserved));
     } catch (err) {
@@ -236,8 +236,8 @@ function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
     return zvippScooters.map((z: Zvipp) => ({
         id: z.bike_id.toString(),
         operator: 'zvipp',
-        lat: Number(z.latitude),
-        lon: Number(z.longitude),
+        lat: Number(z.lat),
+        lon: Number(z.lon),
         code: z['qr-code'],
         battery: z.battery
     }));

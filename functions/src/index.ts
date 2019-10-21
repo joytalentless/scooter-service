@@ -1,4 +1,4 @@
-import {scooters, nearby, bigDataDump} from "./scooters";
+import {scooters, nearby} from "./scooters";
 import {cityBikePriceText, scooterPriceText, prices} from "./mobilityPrices";
 
 export {
@@ -7,5 +7,4 @@ export {
     prices,
     scooterPriceText,
     cityBikePriceText,
-    bigDataDump
 }

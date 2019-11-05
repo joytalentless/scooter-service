@@ -84,8 +84,6 @@ async function getScooters(lat: number, lon: number, range: number) {
     return new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped);
 }
 
-export const nearby = scooters; // Alias for backwards compatibility
-
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
     if (toggles().tier === 'off') {
         console.log('Tier is toggled off');

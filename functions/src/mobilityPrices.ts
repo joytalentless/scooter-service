@@ -50,14 +50,6 @@ const cityBikePrices: priceTexts = {
     }
 };
 
-export const scooterPriceText = functions.region('europe-west1').https.onRequest(async (req, res) => {
-    res.status(200).send(scooterPrices);
-});
-
-export const cityBikePriceText = functions.region('europe-west1').https.onRequest(async (req, res) => {
-    res.status(200).send(cityBikePrices)
-});
-
 export const prices = functions.region('europe-west1').https.onRequest(async (req, res) => {
     res.status(200).send({scooters: scooterPrices, cityBikes: cityBikePrices});
 });

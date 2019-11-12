@@ -31,6 +31,11 @@ from the coordinate, and by the maximum number of scooters you wish to receive.
 | range     | Radius in meters (optional)           | 200 (default) |
 | max       | Maximum number of scooters (optional) | 20 (default)  |
 
+### Required headers
+We require consumers of this endpoint to identify themselves with the header `ET-Client-Name`,
+read more about the `ET-Client-Name` header at /pages-intro-authentication.
+This is both to be able to monitor the usage, and to inform consumers when we introduce important changes.
+
 ### Example response
 ```
 [

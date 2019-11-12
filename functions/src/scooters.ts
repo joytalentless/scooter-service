@@ -2,7 +2,7 @@ import * as functions from 'firebase-functions';
 import * as request from 'superagent';
 
 const CLIENT_HEADER_NAME: string = 'ET-Client-Name';
-const CLIENT_ENTUR: string = 'entur-client-app';
+const CLIENT_ENTUR: string = 'entur-client';
 
 const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
 const voiApiUrl = 'https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status';
@@ -50,17 +50,29 @@ interface Zvipp {
 }
 
 export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
+    if (req.method === 'OPTIONS') {
+        res.status(200).send();
+        return;
+    }
+
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
     const range: number = req.query.range || 200;
     const max: number = req.query.max || 20;
+    const client = req.get(CLIENT_HEADER_NAME);
 
-    if (!lat || !lon) {
-        res.status(422).send("Coordinates missing (lat and lon)");
+    if (!client) {
+        res.status(400).send("ET-Client-Name header missing. Please include a header 'ET-Client-Name' with a value on the form 'Organization - Usecase'.");
+        console.log(`ET-Client-Name missing!`);
         return;
     }
 
-    logClientName(req.get(CLIENT_HEADER_NAME));
+    if (!lat || !lon) {
+        res.status(400).send("Coordinates missing (lat and lon)");
+        return;
+    }
+
+    logClientName(client);
 
     try {
         const vehicles: Vehicle[] = await getScooters(lat, lon, range);
@@ -224,12 +236,8 @@ function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
     }));
 }
 
-function logClientName(client: string | undefined): void {
-    if (!client) {
-        console.log(`ET-Client-Name missing!`);
-    }
-
-    if (client && !client.startsWith(CLIENT_ENTUR)) {
+function logClientName(client: string): void {
+    if (!client.startsWith(CLIENT_ENTUR)) {
         console.log(`ET-Client-Name: ${client}`);
     }
 }

@@ -11,6 +11,8 @@ let voiSessionKey = '';
 const zvippApiUrlOslo = 'https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=60';
 const zvippApiUrlDrammen = 'https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=67';
 
+const TIER_MAX_RANGE = 30000;
+
 interface Vehicle {
     id: string
     operator: string
@@ -57,7 +59,8 @@ export const scooters = functions.region('europe-west1').https.onRequest(async (
 
     const lat: number = req.query.lat;
     const lon: number = req.query.lon;
-    const range: number = req.query.range || 200;
+
+    const range: number = req.query.range > TIER_MAX_RANGE ? TIER_MAX_RANGE : req.query.range || 200;
     const max: number = req.query.max || 20;
     const client = req.get(CLIENT_HEADER_NAME);
 

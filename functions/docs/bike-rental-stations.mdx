@@ -1,5 +1,5 @@
 ---
-name: Bike rental stations
+name: Bike Rental Stations
 menu: Mobility
 ---
 
@@ -7,8 +7,41 @@ menu: Mobility
 
 We offer bike rental station availability data through the [Journey Planner API](/pages-journeyplanner-journeyplanner). Currently we offer data from Oslo Bysykkel, Bergen Bysykkel, Trondheim Bysykkel, Drammen Bysykkel and Lillestrøm bysykkel.
 
-### Example
+### Example query
 
- * [Query for names and availability](https://api.entur.io/journey-planner/v2/ide/?query=%7B%0A%20%20bikeRentalStations%20%7B%0A%20%20%20%20name%0A%20%20%20%20bikesAvailable%0A%20%20%20%20spacesAvailable%0A%20%20%7D%0A%7D)
+See the [example query](https://api.entur.io/journey-planner/v2/ide/?query=%7B%0A%20%20bikeRentalStations%20%7B%0A%20%20%20%20name%0A%20%20%20%20bikesAvailable%0A%20%20%20%20spacesAvailable%0A%20%20%7D%0A%7D) in the GraphiQL editor.
+
+```
+{
+  bikeRentalStations {
+    name
+    bikesAvailable
+    spacesAvailable
+  }
+}
+```
+
+We ask for all bike rental stations, their names, and their availability data. Consult the GraphiQL editor to explore which other fields are available.
+
+### Example response
 
 
+```json
+{
+  "data": {
+    "bikeRentalStations": [
+      {
+        "name": "Møllendalsplass",
+        "bikesAvailable": 1,
+        "spacesAvailable": 13
+      },
+      {
+        "name": "Sandvikstorget",
+        "bikesAvailable": 8,
+        "spacesAvailable": 11
+      },
+      ...
+      ]
+  }
+}
+```

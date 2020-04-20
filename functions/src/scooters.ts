@@ -1,95 +1,111 @@
-import * as functions from 'firebase-functions';
-import * as request from 'superagent';
+import * as functions from "firebase-functions";
+import * as request from "superagent";
 
-const CLIENT_HEADER_NAME: string = 'ET-Client-Name';
-const CLIENT_ENTUR: string = 'entur-client';
+const CLIENT_HEADER_NAME: string = "ET-Client-Name";
+const CLIENT_ENTUR: string = "entur-client";
 
-const tierApiUrl = 'https://platform.tier-services.io/v1/vehicle?zoneId=OSLO';
-const voiApiUrl = 'https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status';
-const voiSessionKeyUrl = 'https://mds.voiapp.io/token';
-let voiSessionKey = '';
-const zvippApiUrlOslo = 'https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=60';
-const zvippApiUrlDrammen = 'https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=67';
+const tierApiUrl = "https://platform.tier-services.io/v1/vehicle?zoneId=OSLO";
+const voiApiUrl = "https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status";
+const voiSessionKeyUrl = "https://mds.voiapp.io/token";
+let voiSessionKey = "";
+const zvippApiUrlOslo =
+    "https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=60";
+const zvippApiUrlDrammen =
+    "https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=67";
 
 const TIER_MAX_RANGE = 30000;
 
 interface Vehicle {
-    id: string
-    operator: string
-    lat: number
-    lon: number
-    code: string
-    battery: number
+    id: string;
+    operator: string;
+    lat: number;
+    lon: number;
+    code: string;
+    battery: number;
 }
 
 interface Voi {
-    bike_id: string
-    lat: number
-    lon: number
-    is_reserved: boolean
-    is_disabled: boolean
+    bike_id: string;
+    lat: number;
+    lon: number;
+    is_reserved: boolean;
+    is_disabled: boolean;
 }
 
 interface Tier {
-    id: string
+    id: string;
     attributes: {
-        lat: number
-        lng: number
-        code: number
-        batteryLevel: number
-    }
+        lat: number;
+        lng: number;
+        code: number;
+        batteryLevel: number;
+    };
 }
 
 interface Zvipp {
-    bike_id: number
-    operator: string
-    lat: string
-    lon: string
-    is_reserved: boolean
-    is_disabled: boolean
-    'qr-code': string
-    battery: number
+    bike_id: number;
+    operator: string;
+    lat: string;
+    lon: string;
+    is_reserved: boolean;
+    is_disabled: boolean;
+    "qr-code": string;
+    battery: number;
 }
 
-export const scooters = functions.region('europe-west1').https.onRequest(async (req, res) => {
-    if (req.method === 'OPTIONS') {
-        res.status(200).send();
-        return;
-    }
+export const scooters = functions
+    .region("europe-west1")
+    .https.onRequest(async (req: any, res: any) => {
+        if (req.method === "OPTIONS") {
+            res.status(200).send();
+            return;
+        }
 
-    const lat: number = req.query.lat;
-    const lon: number = req.query.lon;
+        const lat: number = req.query.lat;
+        const lon: number = req.query.lon;
 
-    const range: number = req.query.range > TIER_MAX_RANGE ? TIER_MAX_RANGE : req.query.range || 200;
-    const max: number = req.query.max || 20;
-    const client = req.get(CLIENT_HEADER_NAME);
+        const range: number =
+            req.query.range > TIER_MAX_RANGE
+                ? TIER_MAX_RANGE
+                : req.query.range || 200;
+        const max: number = req.query.max || 20;
+        const client = req.get(CLIENT_HEADER_NAME);
 
-    if (!client) {
-        res.status(400).send("ET-Client-Name header missing. Please include a header 'ET-Client-Name' with a value on the form 'Organization - Usecase'.");
-        console.log(`ET-Client-Name missing!`);
-        return;
-    }
+        if (!client) {
+            res.status(400).send(
+                "ET-Client-Name header missing. Please include a header 'ET-Client-Name' with a value on the form 'Organization - Usecase'."
+            );
+            console.log(`ET-Client-Name missing!`);
+            return;
+        }
 
-    if (!lat || !lon) {
-        res.status(400).send("Coordinates missing (lat and lon)");
-        return;
-    }
+        if (!lat || !lon) {
+            res.status(400).send("Coordinates missing (lat and lon)");
+            return;
+        }
 
-    logClientName(client);
+        logClientName(client);
 
-    try {
-        const vehicles: Vehicle[] = await getScooters(lat, lon, range);
-        const closestVehicles: Vehicle[] = vehicles.sort((v1, v2) => {
-            return distance(lat, lon, v1.lat, v1.lon) - distance(lat, lon, v2.lat, v2.lon)
-        }).slice(0, max);
+        try {
+            const vehicles: Vehicle[] = await getScooters(lat, lon, range);
+            const closestVehicles: Vehicle[] = vehicles
+                .sort((v1, v2) => {
+                    return (
+                        distance(lat, lon, v1.lat, v1.lon) -
+                        distance(lat, lon, v2.lat, v2.lon)
+                    );
+                })
+                .slice(0, max);
 
-        console.log(`Scooters nearby (${lat}, ${lon}, range: ${range}, max: ${max}): ${closestVehicles.length}`);
-        res.status(200).send(closestVehicles);
-    } catch (e) {
-        console.error(e);
-        res.status(500).send(e);
-    }
-});
+            console.log(
+                `Scooters nearby (${lat}, ${lon}, range: ${range}, max: ${max}): ${closestVehicles.length}`
+            );
+            res.status(200).send(closestVehicles);
+        } catch (e) {
+            console.error(e);
+            res.status(500).send(e);
+        }
+    });
 
 async function getScooters(lat: number, lon: number, range: number) {
     const voiMapped: Vehicle[] = await getVoiScooters();
@@ -100,8 +116,8 @@ async function getScooters(lat: number, lon: number, range: number) {
 }
 
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
-    if (toggles().tier === 'off') {
-        console.log('Tier is toggled off');
+    if (toggles().tier === "off") {
+        console.log("Tier is toggled off");
         return [];
     }
 
@@ -113,7 +129,7 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
     try {
         const tierResponse: request.Response = await request
             .get(`${url}`)
-            .set('x-api-key', functions.config().tier.api.key);
+            .set("x-api-key", functions.config().tier.api.key);
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);
     } catch (err) {
@@ -123,8 +139,8 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
 }
 
 async function getVoiScooters() {
-    if (toggles().voi === 'off') {
-        console.log('Voi is toggled off');
+    if (toggles().voi === "off") {
+        console.log("Voi is toggled off");
         return [];
     }
 
@@ -150,8 +166,8 @@ async function voiRequest() {
     try {
         const voiResponse: request.Response = await request
             .get(`${voiApiUrl}`)
-            .set('Authorization', `Bearer ${voiSessionKey}`)
-            .set('Accept', 'application/vnd.mds.provider+json;version=0.3');
+            .set("Authorization", `Bearer ${voiSessionKey}`)
+            .set("Accept", "application/vnd.mds.provider+json;version=0.3");
         const voi: Voi[] = JSON.parse(voiResponse.text).data.bikes;
         return mapVoi(voi.filter(v => !v.is_disabled && !v.is_reserved));
     } catch (err) {
@@ -164,10 +180,13 @@ async function refreshVoiSessionKey() {
     try {
         const res: request.Response = await request
             .post(`${voiSessionKeyUrl}`)
-            .auth(functions.config().voi.api.user, functions.config().voi.api.pass)
-            .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
-            .set('Content-Type', 'application/x-www-form-urlencoded')
-            .send('grant_type=client_credentials');
+            .auth(
+                functions.config().voi.api.user,
+                functions.config().voi.api.pass
+            )
+            .set("Accept", "application/vnd.mds.provider+json;version=0.3")
+            .set("Content-Type", "application/x-www-form-urlencoded")
+            .send("grant_type=client_credentials");
         voiSessionKey = JSON.parse(res.text).access_token;
     } catch (err) {
         console.error(err);
@@ -175,33 +194,47 @@ async function refreshVoiSessionKey() {
 }
 
 async function getZvippScooters() {
-    if (toggles().zvipp === 'off') {
-        console.log('Zvipp is toggled off');
+    if (toggles().zvipp === "off") {
+        console.log("Zvipp is toggled off");
         return [];
     }
 
     try {
-        const zvippOsloResponse: request.Response = await request
-            .get(`${zvippApiUrlOslo}`);
-        const zvippOslo: Zvipp[] = JSON.parse(zvippOsloResponse.text).data.bikes;
+        const zvippOsloResponse: request.Response = await request.get(
+            `${zvippApiUrlOslo}`
+        );
+        const zvippOslo: Zvipp[] = JSON.parse(zvippOsloResponse.text).data
+            .bikes;
 
-        const zvippDrammenResponse: request.Response = await request
-            .get(`${zvippApiUrlDrammen}`);
-        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data.bikes;
+        const zvippDrammenResponse: request.Response = await request.get(
+            `${zvippApiUrlDrammen}`
+        );
+        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data
+            .bikes;
 
-        return mapZvipp(zvippOslo.concat(zvippDrammen).filter(z => !z.is_disabled && !z.is_reserved));
+        return mapZvipp(
+            zvippOslo
+                .concat(zvippDrammen)
+                .filter(z => !z.is_disabled && !z.is_reserved)
+        );
     } catch (err) {
         console.error(err);
         return [];
     }
 }
 
-function distance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const p = 0.017453292519943295;    // Math.PI / 180
+function distance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+): number {
+    const p = 0.017453292519943295; // Math.PI / 180
     const c = Math.cos;
-    const a = 0.5 - c((lat2 - lat1) * p) / 2 +
-        c(lat1 * p) * c(lat2 * p) *
-        (1 - c((lon2 - lon1) * p)) / 2;
+    const a =
+        0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        (c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p))) / 2;
 
     return 12742 * Math.asin(Math.sqrt(a)) * 1000; // 2 * R; R = 6371 km
 }
@@ -209,10 +242,10 @@ function distance(lat1: number, lon1: number, lat2: number, lon2: number): numbe
 function mapVoi(voiScooters: Voi[]): Vehicle[] {
     return voiScooters.map((v: Voi) => ({
         id: v.bike_id,
-        operator: 'voi',
+        operator: "voi",
         lat: v.lat,
         lon: v.lon,
-        code: '-',
+        code: "-",
         battery: 70
     }));
 }
@@ -220,7 +253,7 @@ function mapVoi(voiScooters: Voi[]): Vehicle[] {
 function mapTier(tierScooters: Tier[]): Vehicle[] {
     return tierScooters.map((t: Tier) => ({
         id: t.id,
-        operator: 'tier',
+        operator: "tier",
         lat: t.attributes.lat,
         lon: t.attributes.lng,
         code: t.attributes.code.toString(),
@@ -231,10 +264,10 @@ function mapTier(tierScooters: Tier[]): Vehicle[] {
 function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
     return zvippScooters.map((z: Zvipp) => ({
         id: z.bike_id.toString(),
-        operator: 'zvipp',
+        operator: "zvipp",
         lat: Number(z.lat),
         lon: Number(z.lon),
-        code: z['qr-code'],
+        code: z["qr-code"],
         battery: z.battery
     }));
 }
@@ -246,5 +279,5 @@ function logClientName(client: string): void {
 }
 
 function toggles() {
-    return functions.config().toggles || {}
+    return functions.config().toggles || {};
 }

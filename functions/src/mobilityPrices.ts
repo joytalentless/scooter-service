@@ -128,6 +128,7 @@ async function tierPrice(zone: string = "OSLO"): Promise<ScooterPrice> {
             },
             lastFetched: new Date()
         };
+        console.log("Updated Scooter price from Tier.");
         return tier.prices;
     } catch (err) {
         console.error(err);

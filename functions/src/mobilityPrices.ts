@@ -38,7 +38,7 @@ const formatDecimals = (price: number, locale: "en" | "no") => {
     const withFraction = fraction && !/^0*$/.test(fraction);
     return withFraction
         ? [integer, fraction.padEnd(2, "0")].join(locale === "en" ? "." : ",")
-        : price;
+        : integer;
 };
 
 function priceToText(startPrice: number, pricePerMinute: number) {

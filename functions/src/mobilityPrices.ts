@@ -35,22 +35,23 @@ let tier = {
 
 const formatDecimals = (price: number, locale: "en" | "no") => {
     const [integer, fraction] = price.toString().split(".");
-    return fraction
+    const withFraction = fraction && !/^0*$/.test(fraction);
+    return withFraction
         ? [integer, fraction.padEnd(2, "0")].join(locale === "en" ? "." : ",")
         : price;
 };
 
 function priceToText(startPrice: number, pricePerMinute: number) {
     return {
-        nob: `${startPrice} kr i oppstart + ${formatDecimals(
+        nob: `${formatDecimals(startPrice, "no")} kr i oppstart + ${formatDecimals(
             pricePerMinute,
             "no"
         )} kr per min`,
-        nno: `${startPrice} kr i oppstart + ${formatDecimals(
+        nno: `${formatDecimals(startPrice, "no")} kr i oppstart + ${formatDecimals(
             pricePerMinute,
             "no"
         )} kr per min`,
-        eng: `NOK ${startPrice} to unlock + NOK ${formatDecimals(
+        eng: `NOK ${formatDecimals(startPrice, "en")} to unlock + NOK ${formatDecimals(
             pricePerMinute,
             "en"
         )} per min`

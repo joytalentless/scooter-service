@@ -5,7 +5,9 @@ const CLIENT_HEADER_NAME: string = "ET-Client-Name";
 const CLIENT_ENTUR: string = "entur-client";
 
 const tierApiUrl = "https://platform.tier-services.io/v1/vehicle?zoneId=OSLO";
-const voiApiUrl = "https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status";
+const voiApiUrlOslo = "https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status";
+const voiApiUrlTrondheim =
+    "https://mds.voiapp.io/v1/gbfs/en/196/free_bike_status";
 const voiSessionKeyUrl = "https://mds.voiapp.io/token";
 let voiSessionKey = "";
 const zvippApiUrlOslo =
@@ -164,12 +166,24 @@ async function getVoiScooters() {
 
 async function voiRequest() {
     try {
-        const voiResponse: request.Response = await request
-            .get(`${voiApiUrl}`)
+        const voiOsloResponse: request.Response = await request
+            .get(`${voiApiUrlOslo}`)
             .set("Authorization", `Bearer ${voiSessionKey}`)
             .set("Accept", "application/vnd.mds.provider+json;version=0.3");
-        const voi: Voi[] = JSON.parse(voiResponse.text).data.bikes;
-        return mapVoi(voi.filter(v => !v.is_disabled && !v.is_reserved));
+        const voiOslo: Voi[] = JSON.parse(voiOsloResponse.text).data.bikes;
+
+        const voiTrondheimResponse: request.Response = await request
+            .get(`${voiApiUrlTrondheim}`)
+            .set("Authorization", `Bearer ${voiSessionKey}`)
+            .set("Accept", "application/vnd.mds.provider+json;version=0.3");
+        const voiTrondheim: Voi[] = JSON.parse(voiTrondheimResponse.text).data
+            .bikes;
+
+        return mapVoi(
+            voiOslo
+                .concat(voiTrondheim)
+                .filter(v => !v.is_disabled && !v.is_reserved)
+        );
     } catch (err) {
         throw err;
     }

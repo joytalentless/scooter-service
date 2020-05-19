@@ -5,7 +5,7 @@
         "build": "tsc",
         "serve": "yarn run build && firebase serve --only functions",
         "shell": "yarn run build && firebase functions:shell",
-        "start": "yarn run shell",
+        "start": "nodemon --watch src -e ts --exec 'yarn build && firebase emulators:start --only functions'",
         "deploy-prod": "firebase deploy --only functions -P entur-mobility && yarn upload-docs",
         "stage": "firebase deploy --only functions -P entur-mobility-staging",
         "logs": "firebase functions:log",
@@ -23,6 +23,7 @@
     "devDependencies": {
         "docz": "1.2.0",
         "docz-theme-default": "1.2.0",
+        "nodemon": "^2.0.3",
         "tslint": "^5.12.0",
         "typescript": "^3.2.2"
     },

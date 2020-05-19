@@ -88,7 +88,7 @@ const cityBikePrices: priceTexts = {
 
 export const prices = functions
     .region("europe-west1")
-    .https.onRequest(async (req: any, res: any) => {
+    .https.onRequest(async (req, res) => {
         const tierPrices = await tierPrice();
 
         res.status(200).send({

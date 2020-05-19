@@ -55,24 +55,22 @@ interface Zvipp {
     battery: number;
 }
 
+interface ScooterQuery {
+    lat?: string;
+    lon?: string;
+    range?: string;
+    max?: string;
+}
+
 export const scooters = functions
     .region("europe-west1")
-    .https.onRequest(async (req: any, res: any) => {
+    .https.onRequest(async (req, res) => {
         if (req.method === "OPTIONS") {
             res.status(200).send();
             return;
         }
 
-        const lat: number = req.query.lat;
-        const lon: number = req.query.lon;
-
-        const range: number =
-            req.query.range > TIER_MAX_RANGE
-                ? TIER_MAX_RANGE
-                : req.query.range || 200;
-        const max: number = req.query.max || 20;
         const client = req.get(CLIENT_HEADER_NAME);
-
         if (!client) {
             res.status(400).send(
                 "ET-Client-Name header missing. Please include a header 'ET-Client-Name' with a value on the form 'Organization - Usecase'."
@@ -81,10 +79,21 @@ export const scooters = functions
             return;
         }
 
+        const query: ScooterQuery = req.query;
+
+        const lat = Number(query.lat);
+        const lon = Number(query.lon);
+
         if (!lat || !lon) {
             res.status(400).send("Coordinates missing (lat and lon)");
             return;
         }
+
+        const range =
+            Number(query.range) > TIER_MAX_RANGE
+                ? TIER_MAX_RANGE
+                : Number(query.range) || 200;
+        const max = Number(query.max || 20);
 
         logClientName(client);
 

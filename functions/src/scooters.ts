@@ -10,10 +10,7 @@ const voiApiUrlTrondheim =
     "https://mds.voiapp.io/v1/gbfs/en/196/free_bike_status";
 const voiSessionKeyUrl = "https://mds.voiapp.io/token";
 let voiSessionKey = "";
-const zvippApiUrlOslo =
-    "https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=60";
-const zvippApiUrlDrammen =
-    "https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=67";
+const zvippApiUrlDrammen = "https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=67";
 
 const TIER_MAX_RANGE = 30000;
 
@@ -214,23 +211,11 @@ async function getZvippScooters() {
     }
 
     try {
-        const zvippOsloResponse: request.Response = await request.get(
-            `${zvippApiUrlOslo}`
-        );
-        const zvippOslo: Zvipp[] = JSON.parse(zvippOsloResponse.text).data
-            .bikes;
 
-        const zvippDrammenResponse: request.Response = await request.get(
-            `${zvippApiUrlDrammen}`
-        );
-        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data
-            .bikes;
+        const zvippDrammenResponse: request.Response = await request.get(zvippApiUrlDrammen);
+        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data.bikes;
 
-        return mapZvipp(
-            zvippOslo
-                .concat(zvippDrammen)
-                .filter(z => !z.is_disabled && !z.is_reserved)
-        );
+        return mapZvipp(zvippDrammen.filter(z => !z.is_disabled && !z.is_reserved));
     } catch (err) {
         console.error(err);
         return [];

@@ -3,8 +3,6 @@
     "scripts": {
         "lint": "tslint --project tsconfig.json",
         "build": "tsc",
-        "serve": "yarn run build && firebase serve --only functions",
-        "shell": "yarn run build && firebase functions:shell",
         "start": "nodemon --watch src -e ts --exec 'yarn build && firebase emulators:start --only functions'",
         "deploy-prod": "firebase deploy --only functions -P entur-mobility && yarn upload-docs",
         "stage": "firebase deploy --only functions -P entur-mobility-staging",
@@ -29,6 +27,6 @@
     },
     "private": true,
     "engines": {
-        "node": "8"
+        "node": "10"
     }
 }

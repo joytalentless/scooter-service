@@ -13,6 +13,7 @@ import {
 import {distance} from "./utils/distance";
 import {toggles} from "./utils/firebase";
 import {ScooterQuery, Vehicle, Voi, Zvipp} from "./utils/interfaces";
+import {logError} from "./utils/logging";
 import {mapTier, mapVoi, mapZvipp} from "./utils/mappers";
 
 let voiSessionKey = "";
@@ -105,7 +106,7 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);
     } catch (err) {
-        console.error(err);
+        logError("Tier", err)
         return [];
     }
 }
@@ -128,7 +129,7 @@ async function getVoiScooters() {
                 return [];
             }
         } else {
-            console.error(err);
+            logError("Voi", err)
             return [];
         }
     }
@@ -173,7 +174,7 @@ async function refreshVoiSessionKey() {
             .send("grant_type=client_credentials");
         voiSessionKey = JSON.parse(res.text).access_token;
     } catch (err) {
-        console.error(err);
+        logError("Voi", err, "Failed to refresh session key")
     }
 }
 
@@ -188,7 +189,7 @@ async function getZvippScooters() {
 
         return mapZvipp(zvippDrammen.filter(z => !z.is_disabled && !z.is_reserved));
     } catch (err) {
-        console.error(err);
+        logError("Zvipp", err)
         return [];
     }
 }

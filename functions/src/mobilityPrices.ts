@@ -10,6 +10,7 @@ import {
 import {toggles} from "./utils/firebase";
 import {ScooterPrice} from "./utils/interfaces";
 import {formatPriceToText} from "./utils/formatters";
+import {logError} from "./utils/logging";
 
 const EPOCH = new Date(0);
 
@@ -68,7 +69,7 @@ async function tierPrice(zone: string = "OSLO"): Promise<ScooterPrice> {
         console.log("Updated Scooter price from Tier.");
         return tier.prices;
     } catch (err) {
-        console.error(err);
+        logError("Tier", err, "Failed to update price")
         return defaultScooterPrice;
     }
 }

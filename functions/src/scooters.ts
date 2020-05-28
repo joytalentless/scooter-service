@@ -1,63 +1,19 @@
 import * as functions from "firebase-functions";
 import * as request from "superagent";
+import {
+    CLIENT_ENTUR,
+    CLIENT_HEADER_NAME,
+    TIER_MAX_RANGE,
+    tierApiUrl,
+    voiApiUrlOslo,
+    voiApiUrlTrondheim,
+    voiSessionKeyUrl,
+    zvippApiUrlDrammen
+} from "./utils/constants";
+import {ScooterQuery, Vehicle, Voi, Zvipp} from "./utils/interfaces";
+import {mapTier, mapVoi, mapZvipp} from "./utils/mappers";
 
-const CLIENT_HEADER_NAME: string = "ET-Client-Name";
-const CLIENT_ENTUR: string = "entur-client";
-
-const tierApiUrl = "https://platform.tier-services.io/v1/vehicle?zoneId=OSLO";
-const voiApiUrlOslo = "https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status";
-const voiApiUrlTrondheim =
-    "https://mds.voiapp.io/v1/gbfs/en/196/free_bike_status";
-const voiSessionKeyUrl = "https://mds.voiapp.io/token";
 let voiSessionKey = "";
-const zvippApiUrlDrammen = "https://zvipp-api.joyridecity.bike/gbfs/en/free_bike_status.json?operator_id=67";
-
-const TIER_MAX_RANGE = 30000;
-
-interface Vehicle {
-    id: string;
-    operator: string;
-    lat: number;
-    lon: number;
-    code: string;
-    battery: number;
-}
-
-interface Voi {
-    bike_id: string;
-    lat: number;
-    lon: number;
-    is_reserved: boolean;
-    is_disabled: boolean;
-}
-
-interface Tier {
-    id: string;
-    attributes: {
-        lat: number;
-        lng: number;
-        code: number;
-        batteryLevel: number;
-    };
-}
-
-interface Zvipp {
-    bike_id: number;
-    operator: string;
-    lat: string;
-    lon: string;
-    is_reserved: boolean;
-    is_disabled: boolean;
-    "qr-code": string;
-    battery: number;
-}
-
-interface ScooterQuery {
-    lat?: string;
-    lon?: string;
-    range?: string;
-    max?: string;
-}
 
 export const scooters = functions
     .region("europe-west1")
@@ -218,9 +174,7 @@ async function getZvippScooters() {
         console.log("Zvipp is toggled off");
         return [];
     }
-
     try {
-
         const zvippDrammenResponse: request.Response = await request.get(zvippApiUrlDrammen);
         const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data.bikes;
 
@@ -231,12 +185,12 @@ async function getZvippScooters() {
     }
 }
 
-function distance(
+const distance = (
     lat1: number,
     lon1: number,
     lat2: number,
     lon2: number
-): number {
+): number => {
     const p = 0.017453292519943295; // Math.PI / 180
     const c = Math.cos;
     const a =
@@ -247,45 +201,10 @@ function distance(
     return 12742 * Math.asin(Math.sqrt(a)) * 1000; // 2 * R; R = 6371 km
 }
 
-function mapVoi(voiScooters: Voi[]): Vehicle[] {
-    return voiScooters.map((v: Voi) => ({
-        id: v.bike_id,
-        operator: "voi",
-        lat: v.lat,
-        lon: v.lon,
-        code: "-",
-        battery: 70
-    }));
-}
-
-function mapTier(tierScooters: Tier[]): Vehicle[] {
-    return tierScooters.map((t: Tier) => ({
-        id: t.id,
-        operator: "tier",
-        lat: t.attributes.lat,
-        lon: t.attributes.lng,
-        code: t.attributes.code.toString(),
-        battery: t.attributes.batteryLevel
-    }));
-}
-
-function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
-    return zvippScooters.map((z: Zvipp) => ({
-        id: z.bike_id.toString(),
-        operator: "zvipp",
-        lat: Number(z.lat),
-        lon: Number(z.lon),
-        code: z["qr-code"],
-        battery: z.battery
-    }));
-}
-
-function logClientName(client: string): void {
+const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
         console.log(`ET-Client-Name: ${client}`);
     }
 }
 
-function toggles() {
-    return functions.config().toggles || {};
-}
+const toggles = () => functions.config().toggles || {};

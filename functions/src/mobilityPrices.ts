@@ -7,6 +7,7 @@ import {
     scooterPrices,
     tierPricingApiUrl
 } from "./utils/constants";
+import {toggles} from "./utils/firebase";
 import {ScooterPrice} from "./utils/interfaces";
 import {formatPriceToText} from "./utils/formatters";
 
@@ -19,6 +20,9 @@ let tier = {
     },
     lastFetched: EPOCH
 };
+
+const priceFetchedWithinLast30Minutes = () =>
+    new Date().getTime() < tier.lastFetched.getTime() + 30 * MILLIS_PER_MINUTE
 
 export const prices = functions
     .region("europe-west1")
@@ -68,9 +72,3 @@ async function tierPrice(zone: string = "OSLO"): Promise<ScooterPrice> {
         return defaultScooterPrice;
     }
 }
-
-const priceFetchedWithinLast30Minutes = () =>
-    new Date().getTime() < tier.lastFetched.getTime() + 30 * MILLIS_PER_MINUTE
-
-const toggles = () => functions.config().toggles || {};
-

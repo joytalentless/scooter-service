@@ -10,11 +10,11 @@ import {
     voiSessionKeyUrl,
     zvippApiUrlDrammen
 } from "./utils/constants";
-import {distance} from "./utils/distance";
-import {toggles} from "./utils/firebase";
-import {ScooterQuery, Vehicle, Voi, Zvipp} from "./utils/interfaces";
-import {logError} from "./utils/logging";
-import {mapTier, mapVoi, mapZvipp} from "./utils/mappers";
+import { distance } from "./utils/distance";
+import { toggles } from "./utils/firebase";
+import { ScooterQuery, Vehicle, Voi, Zvipp } from "./utils/interfaces";
+import { logError } from "./utils/logging";
+import { mapTier, mapVoi, mapZvipp } from "./utils/mappers";
 
 let voiSessionKey = "";
 
@@ -22,7 +22,7 @@ const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
         console.log(`ET-Client-Name: ${client}`);
     }
-}
+};
 
 export const scooters = functions
     .region("europe-west1")
@@ -106,7 +106,7 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);
     } catch (err) {
-        logError("Tier", err)
+        logError("Tier", err);
         return [];
     }
 }
@@ -129,7 +129,7 @@ async function getVoiScooters() {
                 return [];
             }
         } else {
-            logError("Voi", err)
+            logError("Voi", err);
             return [];
         }
     }
@@ -140,12 +140,14 @@ async function voiRequest() {
         const voiOsloResponse: request.Response = await request
             .get(`${voiApiUrlOslo}`)
             .set("Authorization", `Bearer ${voiSessionKey}`)
+            .set("X-Voigbfs-Ext", "Battery")
             .set("Accept", "application/vnd.mds.provider+json;version=0.3");
         const voiOslo: Voi[] = JSON.parse(voiOsloResponse.text).data.bikes;
 
         const voiTrondheimResponse: request.Response = await request
             .get(`${voiApiUrlTrondheim}`)
             .set("Authorization", `Bearer ${voiSessionKey}`)
+            .set("X-Voigbfs-Ext", "Battery")
             .set("Accept", "application/vnd.mds.provider+json;version=0.3");
         const voiTrondheim: Voi[] = JSON.parse(voiTrondheimResponse.text).data
             .bikes;
@@ -174,7 +176,7 @@ async function refreshVoiSessionKey() {
             .send("grant_type=client_credentials");
         voiSessionKey = JSON.parse(res.text).access_token;
     } catch (err) {
-        logError("Voi", err, "Failed to refresh session key")
+        logError("Voi", err, "Failed to refresh session key");
     }
 }
 
@@ -184,13 +186,17 @@ async function getZvippScooters() {
         return [];
     }
     try {
-        const zvippDrammenResponse: request.Response = await request.get(zvippApiUrlDrammen);
-        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data.bikes;
+        const zvippDrammenResponse: request.Response = await request.get(
+            zvippApiUrlDrammen
+        );
+        const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data
+            .bikes;
 
-        return mapZvipp(zvippDrammen.filter(z => !z.is_disabled && !z.is_reserved));
+        return mapZvipp(
+            zvippDrammen.filter(z => !z.is_disabled && !z.is_reserved)
+        );
     } catch (err) {
-        logError("Zvipp", err)
+        logError("Zvipp", err);
         return [];
     }
 }
-

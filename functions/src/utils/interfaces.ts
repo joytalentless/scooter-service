@@ -13,6 +13,7 @@ export interface Voi {
     lon: number;
     is_reserved: boolean;
     is_disabled: boolean;
+    battery: number;
 }
 
 export interface Tier {

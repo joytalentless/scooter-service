@@ -13,8 +13,9 @@ import {
 import { distance } from "./utils/distance";
 import { toggles } from "./utils/firebase";
 import { ScooterQuery, Vehicle, Voi, Zvipp } from "./utils/interfaces";
-import { logError } from "./utils/logging";
-import { mapTier, mapVoi, mapZvipp } from "./utils/mappers";
+import { capitalizeFirstLetter, logError} from "./utils/logging";
+import {mapTier, mapVoi, mapZvipp} from "./utils/mappers";
+import {Operator} from "./utils/operators";
 
 let voiSessionKey = "";
 
@@ -90,7 +91,7 @@ async function getScooters(lat: number, lon: number, range: number) {
 
 async function getTierScooters(lat?: number, lon?: number, range?: number) {
     if (toggles().tier === "off") {
-        console.log("Tier is toggled off");
+        console.log(`${capitalizeFirstLetter(Operator.TIER)} is toggled off`);
         return [];
     }
 
@@ -106,14 +107,14 @@ async function getTierScooters(lat?: number, lon?: number, range?: number) {
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);
     } catch (err) {
-        logError("Tier", err);
+        logError(Operator.TIER, err);
         return [];
     }
 }
 
 async function getVoiScooters() {
     if (toggles().voi === "off") {
-        console.log("Voi is toggled off");
+        console.log(`${capitalizeFirstLetter(Operator.VOI)} is toggled off`);
         return [];
     }
 
@@ -129,7 +130,7 @@ async function getVoiScooters() {
                 return [];
             }
         } else {
-            logError("Voi", err);
+            logError(Operator.VOI, err);
             return [];
         }
     }
@@ -163,7 +164,7 @@ async function voiRequest() {
 }
 
 async function refreshVoiSessionKey() {
-    console.log("Refreshing VOI session key..");
+    console.log(`Refreshing ${Operator.VOI} session key..`);
     try {
         const res: request.Response = await request
             .post(`${voiSessionKeyUrl}`)
@@ -176,13 +177,13 @@ async function refreshVoiSessionKey() {
             .send("grant_type=client_credentials");
         voiSessionKey = JSON.parse(res.text).access_token;
     } catch (err) {
-        logError("Voi", err, "Failed to refresh session key");
+        logError(Operator.VOI, err, "Failed to refresh session key");
     }
 }
 
 async function getZvippScooters() {
     if (toggles().zvipp === "off") {
-        console.log("Zvipp is toggled off");
+        console.log(`${capitalizeFirstLetter(Operator.ZVIPP)} is toggled off`);
         return [];
     }
     try {
@@ -196,7 +197,7 @@ async function getZvippScooters() {
             zvippDrammen.filter(z => !z.is_disabled && !z.is_reserved)
         );
     } catch (err) {
-        logError("Zvipp", err);
+        logError(Operator.ZVIPP, err);
         return [];
     }
 }

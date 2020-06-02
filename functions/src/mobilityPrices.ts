@@ -8,9 +8,10 @@ import {
     tierPricingApiUrl
 } from "./utils/constants";
 import {toggles} from "./utils/firebase";
-import {ScooterPrice} from "./utils/interfaces";
 import {formatPriceToText} from "./utils/formatters";
-import {logError} from "./utils/logging";
+import {ScooterPrice} from "./utils/interfaces";
+import {capitalizeFirstLetter, logError} from "./utils/logging";
+import {Operator} from "./utils/operators";
 
 const EPOCH = new Date(0);
 
@@ -44,7 +45,7 @@ export const prices = functions
 
 async function tierPrice(zone: string = "OSLO"): Promise<ScooterPrice> {
     if (toggles().tier === "off") {
-        console.log("Tier is toggled off");
+        console.log(`${capitalizeFirstLetter(Operator.TIER)} is toggled off`);
         return defaultScooterPrice;
     }
     if (priceFetchedWithinLast30Minutes()) {
@@ -66,10 +67,10 @@ async function tierPrice(zone: string = "OSLO"): Promise<ScooterPrice> {
             },
             lastFetched: new Date()
         };
-        console.log("Updated Scooter price from Tier.");
+        console.log(`Updated Scooter price from ${capitalizeFirstLetter(Operator.TIER)}.`);
         return tier.prices;
     } catch (err) {
-        logError("Tier", err, "Failed to update price")
+        logError(Operator.TIER, err, "Failed to update price")
         return defaultScooterPrice;
     }
 }

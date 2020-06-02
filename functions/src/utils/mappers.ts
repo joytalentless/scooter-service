@@ -1,4 +1,4 @@
-import {Tier, Vehicle, Voi, Zvipp} from "./interfaces";
+import { Tier, Vehicle, Voi, Zvipp } from "./interfaces";
 import {getNeTExId, Operator} from "./operators";
 
 export function mapVoi(voiScooters: Voi[]): Vehicle[] {
@@ -8,7 +8,7 @@ export function mapVoi(voiScooters: Voi[]): Vehicle[] {
         lat: v.lat,
         lon: v.lon,
         code: "-",
-        battery: 70
+        battery: v.battery
     }));
 }
 

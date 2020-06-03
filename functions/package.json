@@ -6,6 +6,7 @@
         "start": "nodemon --watch src -e ts --exec 'yarn build && firebase emulators:start --only functions'",
         "deploy-prod": "firebase deploy --only functions -P entur-mobility && yarn upload-docs",
         "stage": "firebase deploy --only functions -P entur-mobility-staging",
+        "stage-heatmap": "firebase deploy --only hosting -P entur-mobility-staging",
         "logs": "firebase functions:log",
         "docz:dev": "docz dev",
         "docz:build": "docz build",

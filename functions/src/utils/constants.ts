@@ -3,8 +3,7 @@ import { formatPriceToText } from "./formatters";
 
 export const CLIENT_HEADER_NAME: string = "ET-Client-Name";
 export const CLIENT_ENTUR: string = "entur-client";
-export const tierApiUrl =
-    "https://platform.tier-services.io/v1/vehicle?zoneId=OSLO";
+export const tierApiUrl = "https://platform.tier-services.io/v1/vehicle";
 export const tierPricingApiUrl = "https://platform.tier-services.io/v1/pricing";
 export const voiApiUrlOslo =
     "https://mds.voiapp.io/v1/gbfs/en/27/free_bike_status";

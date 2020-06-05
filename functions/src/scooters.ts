@@ -89,20 +89,16 @@ async function getScooters(lat: number, lon: number, range: number) {
     return new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped);
 }
 
-async function getTierScooters(lat?: number, lon?: number, range?: number) {
+async function getTierScooters(lat: number, lon: number, range: number) {
     if (toggles().tier === "off") {
         console.log(`${capitalizeFirstLetter(Operator.TIER)} is toggled off`);
         return [];
     }
-
-    let url: string = tierApiUrl;
-    if (lat && lon && range) {
-        url = `${tierApiUrl}&lat=${lat}&lng=${lon}&radius=${range}`;
-    }
+    const url = `${tierApiUrl}?lat=${lat}&lng=${lon}&radius=${range}`;
 
     try {
         const tierResponse: request.Response = await request
-            .get(`${url}`)
+            .get(url)
             .set("x-api-key", functions.config().tier.api.key);
         const tier = JSON.parse(tierResponse.text).data;
         return mapTier(tier);

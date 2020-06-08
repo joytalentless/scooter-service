@@ -5,7 +5,6 @@ import {
     defaultScooterPrice,
     MILLIS_PER_MINUTE,
     scooterPrices,
-    tierPricingApiUrl
 } from "./utils/constants";
 import {toggles} from "./utils/firebase";
 import {formatPriceToText} from "./utils/formatters";
@@ -54,7 +53,7 @@ async function tierPrice(zone: string = "OSLO"): Promise<ScooterPrice> {
 
     try {
         const tierResponse: request.Response = await request
-            .get(`${tierPricingApiUrl}?zoneId=${zone}`)
+            .get(`${functions.config().tier.url.price}?zoneId=${zone}`)
             .set("x-api-key", functions.config().tier.api.key);
         const {
             attributes: {rentalStartPrice, rentalRunningPricePerMinute}

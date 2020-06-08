@@ -4,11 +4,6 @@ import {
     CLIENT_ENTUR,
     CLIENT_HEADER_NAME,
     TIER_MAX_RANGE,
-    tierApiUrl,
-    voiApiUrlOslo,
-    voiApiUrlTrondheim,
-    voiSessionKeyUrl,
-    zvippApiUrlDrammen
 } from "./utils/constants";
 import { distance } from "./utils/distance";
 import { toggles } from "./utils/firebase";
@@ -94,7 +89,7 @@ async function getTierScooters(lat: number, lon: number, range: number) {
         console.log(`${capitalizeFirstLetter(Operator.TIER)} is toggled off`);
         return [];
     }
-    const url = `${tierApiUrl}?lat=${lat}&lng=${lon}&radius=${range}`;
+    const url = `${functions.config().tier.url.all}?lat=${lat}&lng=${lon}&radius=${range}`;
 
     try {
         const tierResponse: request.Response = await request
@@ -135,14 +130,14 @@ async function getVoiScooters() {
 async function voiRequest() {
     try {
         const voiOsloResponse: request.Response = await request
-            .get(`${voiApiUrlOslo}`)
+            .get(`${functions.config().voi.url.oslo}`)
             .set("Authorization", `Bearer ${voiSessionKey}`)
             .set("X-Voigbfs-Ext", "Battery")
             .set("Accept", "application/vnd.mds.provider+json;version=0.3");
         const voiOslo: Voi[] = JSON.parse(voiOsloResponse.text).data.bikes;
 
         const voiTrondheimResponse: request.Response = await request
-            .get(`${voiApiUrlTrondheim}`)
+            .get(`${functions.config().voi.url.trondheim}`)
             .set("Authorization", `Bearer ${voiSessionKey}`)
             .set("X-Voigbfs-Ext", "Battery")
             .set("Accept", "application/vnd.mds.provider+json;version=0.3");
@@ -163,7 +158,7 @@ async function refreshVoiSessionKey() {
     console.log(`Refreshing ${Operator.VOI} session key..`);
     try {
         const res: request.Response = await request
-            .post(`${voiSessionKeyUrl}`)
+            .post(`${functions.config().voi.url.sessionkey}`)
             .auth(
                 functions.config().voi.api.user,
                 functions.config().voi.api.pass
@@ -184,7 +179,7 @@ async function getZvippScooters() {
     }
     try {
         const zvippDrammenResponse: request.Response = await request.get(
-            zvippApiUrlDrammen
+            functions.config().zvipp.url.drammen
         );
         const zvippDrammen: Zvipp[] = JSON.parse(zvippDrammenResponse.text).data
             .bikes;

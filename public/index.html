@@ -340,11 +340,11 @@
         }
     ]
 
-    let mapZ = document.createElement('script')
-    mapZ.async = true
-    mapZ.defer = true
-    mapZ.src = `https://maps.googleapis.com/maps/api/js?${googleMapsApiKey ? `key=${googleMapsApiKey}&` : ''}libraries=visualization&callback=initMap`
-    document.body.appendChild(mapZ)
+    let googleMap = document.createElement('script')
+    googleMap.async = true
+    googleMap.defer = true
+    googleMap.src = `https://maps.googleapis.com/maps/api/js?${googleMapsApiKey ? `key=${googleMapsApiKey}&` : ''}libraries=visualization&callback=initMap`
+    document.body.appendChild(googleMap)
 </script>
 </body>
 </html>

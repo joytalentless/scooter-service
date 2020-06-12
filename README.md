@@ -71,3 +71,11 @@ yarn deploy-prod
 in the `public`-folder you can find a simple application showing a heatmap for scooters in Norway.
 For the map to be fully functional, you have to edit the html code and add the API-key for google maps.
 This key can be found in Google cloud console --> Credentials --> API keys. Pick the "Browser key".
+
+The heatmap runs on `https://entur-mobility-staging.firebaseapp.com/`
+
+Deploy
+```
+yarn stage-heatmap
+```
+

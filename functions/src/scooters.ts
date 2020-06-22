@@ -7,9 +7,9 @@ import {
 } from "./utils/constants";
 import { distance } from "./utils/distance";
 import { toggles } from "./utils/firebase";
-import { ScooterQuery, Vehicle, Voi, Zvipp } from "./utils/interfaces";
+import { ScooterQuery, Vehicle, Voi, Zvipp, Lime } from "./utils/interfaces";
 import { capitalizeFirstLetter, logError} from "./utils/logging";
-import {mapTier, mapVoi, mapZvipp} from "./utils/mappers";
+import {mapTier, mapVoi, mapZvipp, mapLime} from "./utils/mappers";
 import {Operator} from "./utils/operators";
 
 let voiSessionKey = "";
@@ -80,8 +80,9 @@ async function getScooters(lat: number, lon: number, range: number) {
     const voiMapped: Vehicle[] = await getVoiScooters();
     const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range);
     const zvippMapped: Vehicle[] = await getZvippScooters();
+    const limeMapped: Vehicle[] = await getLimeScooters();
 
-    return new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped);
+    return new Array<Vehicle>().concat(voiMapped, tierMapped, zvippMapped, limeMapped);
 }
 
 async function getTierScooters(lat: number, lon: number, range: number) {
@@ -189,6 +190,28 @@ async function getZvippScooters() {
         );
     } catch (err) {
         logError(Operator.ZVIPP, err);
+        return [];
+    }
+}
+
+async function getLimeScooters() {
+    if (toggles().lime === "off") {
+        console.log(`${capitalizeFirstLetter(Operator.LIME)} is toggled off`);
+        return [];
+    }
+    try {
+        const limeOsloResponse: request.Response = await request
+
+            .get(functions.config().lime.url.oslo)
+            .set("Authorization", "Bearer " + functions.config().lime.api.token);
+        const limeOslo: Lime[] = JSON.parse(limeOsloResponse.text).data
+            .bikes;
+
+        return mapLime(
+            limeOslo.filter(z => !z.is_disabled && !z.is_reserved)
+        );
+    } catch (err) {
+        logError(Operator.LIME, err);
         return [];
     }
 }

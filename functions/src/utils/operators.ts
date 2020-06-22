@@ -1,7 +1,8 @@
 export enum Operator {
     VOI = "VOI",
     TIER = "TIER",
-    ZVIPP = "ZVIPP"
+    ZVIPP = "ZVIPP",
+    LIME = "LIME"
 }
 
 const getCodespace = (operator: Operator): string => {
@@ -12,6 +13,8 @@ const getCodespace = (operator: Operator): string => {
             return "YTI";
         case Operator.ZVIPP:
             return "YZV";
+        case Operator.LIME:
+            return "LIM";
     }
 }
 export const getNeTExId = (id: string, operator: Operator) => `${getCodespace(operator)}:Scooter:${id}`

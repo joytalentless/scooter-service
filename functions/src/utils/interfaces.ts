@@ -37,6 +37,15 @@ export interface Zvipp {
     battery: number;
 }
 
+export interface Lime {
+    bike_id: string;
+    operator: string;
+    lat: string;
+    lon: string;
+    is_reserved: boolean;
+    is_disabled: boolean;
+}
+
 export interface ScooterQuery {
     lat?: string;
     lon?: string;

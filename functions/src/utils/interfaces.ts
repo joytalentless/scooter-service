@@ -5,6 +5,7 @@ export interface Vehicle {
     lon: number;
     code: string;
     battery: number;
+    batteryEnum: string;
 }
 
 export interface Voi {
@@ -44,6 +45,7 @@ export interface Lime {
     lon: string;
     is_reserved: boolean;
     is_disabled: boolean;
+    battery_level: string;
 }
 
 export interface ScooterQuery {

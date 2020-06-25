@@ -7,9 +7,7 @@ export function mapVoi(voiScooters: Voi[]): Vehicle[] {
         operator: Operator.VOI.toLowerCase(),
         lat: v.lat,
         lon: v.lon,
-        code: "-",
         battery: v.battery,
-        batteryLevel: "-"
     }));
 }
 
@@ -21,7 +19,6 @@ export function mapTier(tierScooters: Tier[]): Vehicle[] {
         lon: t.attributes.lng,
         code: t.attributes.code.toString(),
         battery: t.attributes.batteryLevel,
-        batteryLevel: "-"
     }));
 }
 
@@ -33,7 +30,6 @@ export function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
         lon: Number(z.lon),
         code: z["qr-code"],
         battery: z.battery,
-        batteryLevel: "-"
     }));
 }
 
@@ -43,8 +39,6 @@ export function mapLime(limeScooters: Lime[]): Vehicle[] {
         operator: Operator.LIME.toLowerCase(),
         lat: Number(l.lat),
         lon: Number(l.lon),
-        code: "-",
-        battery: -1,
         batteryLevel: l.battery_level
     }));
 }

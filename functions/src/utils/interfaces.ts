@@ -3,9 +3,9 @@ export interface Vehicle {
     operator: string;
     lat: number;
     lon: number;
-    code: string;
-    battery: number;
-    batteryLevel: string;
+    code?: string;
+    battery?: number;
+    batteryLevel?: string;
 }
 
 export interface Voi {

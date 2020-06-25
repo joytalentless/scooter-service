@@ -5,7 +5,7 @@ export interface Vehicle {
     lon: number;
     code: string;
     battery: number;
-    batteryEnum: string;
+    batteryLevel: string;
 }
 
 export interface Voi {

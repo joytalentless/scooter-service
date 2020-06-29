@@ -76,18 +76,19 @@ export const scooters = functions
         }
     })
 
-async function getScooters(lat: number, lon: number, range: number) {
-    const voiMapped: Vehicle[] = await getVoiScooters()
-    const tierMapped: Vehicle[] = await getTierScooters(lat, lon, range)
-    const zvippMapped: Vehicle[] = await getZvippScooters()
-    const limeMapped: Vehicle[] = await getLimeScooters()
+async function getScooters(
+    lat: number,
+    lon: number,
+    range: number,
+): Promise<Vehicle[]> {
+    const [voi, tier, zvipp, lime] = await Promise.all([
+        getVoiScooters(),
+        getTierScooters(lat, lon, range),
+        getZvippScooters(),
+        getLimeScooters(),
+    ])
 
-    return new Array<Vehicle>().concat(
-        voiMapped,
-        tierMapped,
-        zvippMapped,
-        limeMapped,
-    )
+    return [...voi, ...tier, ...zvipp, ...lime]
 }
 
 async function getTierScooters(lat: number, lon: number, range: number) {

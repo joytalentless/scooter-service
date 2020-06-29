@@ -1,20 +1,21 @@
 export enum Operator {
-    VOI = "VOI",
-    TIER = "TIER",
-    ZVIPP = "ZVIPP",
-    LIME = "LIME"
+    VOI = 'VOI',
+    TIER = 'TIER',
+    ZVIPP = 'ZVIPP',
+    LIME = 'LIME',
 }
 
 const getCodespace = (operator: Operator): string => {
     switch (operator) {
         case Operator.VOI:
-            return "YVO";
+            return 'YVO'
         case Operator.TIER:
-            return "YTI";
+            return 'YTI'
         case Operator.ZVIPP:
-            return "YZV";
+            return 'YZV'
         case Operator.LIME:
-            return "LIM";
+            return 'LIM'
     }
 }
-export const getNeTExId = (id: string, operator: Operator) => `${getCodespace(operator)}:Scooter:${id}`
+export const getNeTExId = (id: string, operator: Operator) =>
+    `${getCodespace(operator)}:Scooter:${id}`

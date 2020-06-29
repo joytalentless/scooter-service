@@ -1,3 +1,3 @@
-import * as functions from "firebase-functions";
+import * as functions from 'firebase-functions'
 
-export const toggles = () => functions.config().toggles || {};
+export const toggles = () => functions.config().toggles || {}

@@ -1,5 +1,5 @@
-import { Tier, Vehicle, Voi, Zvipp, Lime } from "./interfaces";
-import {getNeTExId, Operator} from "./operators";
+import { Tier, Vehicle, Voi, Zvipp, Lime } from './interfaces'
+import { getNeTExId, Operator } from './operators'
 
 export function mapVoi(voiScooters: Voi[]): Vehicle[] {
     return voiScooters.map((v: Voi) => ({
@@ -8,7 +8,7 @@ export function mapVoi(voiScooters: Voi[]): Vehicle[] {
         lat: v.lat,
         lon: v.lon,
         battery: v.battery,
-    }));
+    }))
 }
 
 export function mapTier(tierScooters: Tier[]): Vehicle[] {
@@ -19,7 +19,7 @@ export function mapTier(tierScooters: Tier[]): Vehicle[] {
         lon: t.attributes.lng,
         code: t.attributes.code.toString(),
         battery: t.attributes.batteryLevel,
-    }));
+    }))
 }
 
 export function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
@@ -28,9 +28,9 @@ export function mapZvipp(zvippScooters: Zvipp[]): Vehicle[] {
         operator: Operator.ZVIPP.toLowerCase(),
         lat: Number(z.lat),
         lon: Number(z.lon),
-        code: z["qr-code"],
+        code: z['qr-code'],
         battery: z.battery,
-    }));
+    }))
 }
 
 export function mapLime(limeScooters: Lime[]): Vehicle[] {
@@ -39,6 +39,6 @@ export function mapLime(limeScooters: Lime[]): Vehicle[] {
         operator: Operator.LIME.toLowerCase(),
         lat: Number(l.lat),
         lon: Number(l.lon),
-        batteryLevel: l.battery_level
-    }));
+        batteryLevel: l.battery_level,
+    }))
 }

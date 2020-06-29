@@ -1,7 +1,4 @@
-import {scooters} from "./scooters";
-import {prices} from "./mobilityPrices";
+import { scooters } from './scooters'
+import { prices } from './mobilityPrices'
 
-export {
-    scooters,
-    prices,
-}
+export { scooters, prices }

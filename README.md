@@ -1,13 +1,13 @@
 # Mobility functions
 
-The Entur-Mobility app is an api that contains two endpoints. 
-* `scooters` close to a user-specified location. 
+The Entur-Mobility app is an api that contains two endpoints.
+* `scooters` close to a user-specified location.
 * `prices` for mobility services such as scooters and city bikes.
 
 
 ## ./functions
 
-The api runs on `firebase`, in terms of functions, hence the 
+The api runs on `firebase`, in terms of functions, hence the
 `firebase`-[CLI](https://firebase.google.com/docs/cli) and the [Google Cloud SDK](https://cloud.google.com/sdk/) are required.
 
 Follow the installation instructions and restart the terminal.
@@ -17,20 +17,20 @@ The current project should be `entur-mobility-staging`. If it is not, then switc
 
 ## Run app
 
-* Install firebase:  
+* Install firebase:
 `curl -sL https://firebase.tools | bash`
-* Set configs:  
+* Set configs:
 `firebase functions:config:get > .runtimeconfig.json`
-* Install correct node version:  
+* Install correct node version:
 `nvm install 10.20`
-* Navigate to functions:  
+* Navigate to functions:
 `cd functions`
-* Install dependencies:  
-`yarn install`
-* Use correct node version:  
+* Install dependencies:
+`npm install`
+* Use correct node version:
 `nvm use v10.20`
-* Build project and start emulator:  
-`yarn start`
+* Build project and start emulator:
+`npm start`
 
 Now, the app is running on localhost.
 
@@ -59,12 +59,12 @@ with header: `ET-Client-Name: Entur`
 ## Deploy
 Deploy to staging:
 ```
-yarn stage
-``` 
+npm run stage
+```
 
 Deploy to production:
 ```
-yarn deploy-prod
+npm run deploy-prod
 ```
 
 ## Heatmap
@@ -76,6 +76,5 @@ The heatmap runs on `https://entur-mobility-staging.firebaseapp.com/`
 
 Deploy
 ```
-yarn stage-heatmap
+npm run stage-heatmap
 ```
-

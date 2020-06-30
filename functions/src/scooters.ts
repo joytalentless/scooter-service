@@ -20,9 +20,8 @@ const logClientName = (client: string): void => {
     }
 }
 
-export const scooters = functions
-    .region('europe-west1')
-    .https.onRequest(async (req, res) => {
+export const scooters = functions.region('europe-west1').https.onRequest(
+    async (req, res): Promise<void> => {
         if (req.method === 'OPTIONS') {
             res.status(200).send()
             return
@@ -57,12 +56,26 @@ export const scooters = functions
 
         const { operators } = query
 
-        const operatorsWhitelist = operators
-            ? operators
-                  .split(',')
-                  .map((name) => name.toUpperCase())
-                  .filter(isOperatorName)
-            : undefined
+        const operatorsArgument = operators ? operators.split(',') : undefined
+
+        const invalidOperators =
+            operatorsArgument &&
+            operatorsArgument.filter(
+                (name) => !isOperatorName(name.toUpperCase()),
+            )
+
+        if (invalidOperators?.length) {
+            res.status(400).send(
+                `Invalid operator names passed: ${invalidOperators.join(', ')}`,
+            )
+            return
+        }
+
+        const operatorsWhitelist =
+            operatorsArgument &&
+            operatorsArgument
+                .map((name) => name.toUpperCase())
+                .filter(isOperatorName)
 
         try {
             const vehicles: Vehicle[] = await getScooters(
@@ -88,7 +101,8 @@ export const scooters = functions
             console.error(e)
             res.status(500).send(e)
         }
-    })
+    },
+)
 
 async function getScooters(
     lat: number,

@@ -1,3 +1,10 @@
 import * as functions from 'firebase-functions'
 
-export const toggles = () => functions.config().toggles || {}
+interface Toggles {
+    lime?: 'off'
+    tier?: 'off'
+    voi?: 'off'
+    zvipp?: 'off'
+}
+
+export const toggles = (): Toggles => functions.config().toggles || {}

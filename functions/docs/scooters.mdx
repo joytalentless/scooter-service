@@ -26,12 +26,13 @@ At the time of writing, we have data from Tier, Voi, Zvipp, and Lime.
 </ExpandablePanel>
 
 ### Query parameters
-| Parameter | Description                           | Example       |
-|:--------- |:--------------------------------------|:------------- |
-| lat       | Latitude                              | 59.909        |
-| lon       | Longitude                             | 10.746        |
-| range     | Radius in meters (optional)           | 200 (default) |
-| max       | Maximum number of scooters (optional) | 20 (default)  |
+| Parameter | Description                                                | Example             |
+|:--------- |:-----------------------------------------------------------|:--------------------|
+| lat       | Latitude                                                   | 59.909              |
+| lon       | Longitude                                                  | 10.746              |
+| range     | Radius in meters (optional)                                | 200 (default)       |
+| max       | Maximum number of scooters (optional)                      | 20 (default)        |
+| operators | Whitelist of scooter operators, comma-separated (optional) | tier,voi,zvipp,lime |
 
 ### Required headers
 We require consumers of this endpoint to identify themselves with the header `ET-Client-Name`.

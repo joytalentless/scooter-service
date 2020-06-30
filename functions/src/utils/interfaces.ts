@@ -53,6 +53,7 @@ export interface ScooterQuery {
     lon?: string
     range?: string
     max?: string
+    operators?: string
 }
 
 export interface priceText {

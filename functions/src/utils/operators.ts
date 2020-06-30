@@ -5,6 +5,8 @@ export enum Operator {
     LIME = 'LIME',
 }
 
+export const ALL_OPERATORS = Object.values(Operator)
+
 const getCodespace = (operator: Operator): string => {
     switch (operator) {
         case Operator.VOI:
@@ -17,5 +19,11 @@ const getCodespace = (operator: Operator): string => {
             return 'LIM'
     }
 }
-export const getNeTExId = (id: string, operator: Operator) =>
-    `${getCodespace(operator)}:Scooter:${id}`
+
+export function getNeTExId(id: string, operator: Operator): string {
+    return `${getCodespace(operator)}:Scooter:${id}`
+}
+
+export function isOperatorName(name: string): name is Operator {
+    return name in Operator
+}

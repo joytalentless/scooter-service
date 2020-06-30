@@ -10,7 +10,7 @@ import { toggles } from './utils/firebase'
 import { ScooterQuery, Vehicle, Voi, Zvipp, Lime } from './utils/interfaces'
 import { capitalizeFirstLetter, logError } from './utils/logging'
 import { mapTier, mapVoi, mapZvipp, mapLime } from './utils/mappers'
-import { Operator } from './utils/operators'
+import { Operator, isOperatorName, ALL_OPERATORS } from './utils/operators'
 
 let voiSessionKey = ''
 
@@ -55,8 +55,22 @@ export const scooters = functions
 
         logClientName(client)
 
+        const { operators } = query
+
+        const operatorsWhitelist = operators
+            ? operators
+                  .split(',')
+                  .map((name) => name.toUpperCase())
+                  .filter(isOperatorName)
+            : undefined
+
         try {
-            const vehicles: Vehicle[] = await getScooters(lat, lon, range)
+            const vehicles: Vehicle[] = await getScooters(
+                lat,
+                lon,
+                range,
+                operatorsWhitelist,
+            )
             const closestVehicles: Vehicle[] = vehicles
                 .sort((v1, v2) => {
                     return (
@@ -80,15 +94,26 @@ async function getScooters(
     lat: number,
     lon: number,
     range: number,
+    operatorsWhitelist: Operator[] = ALL_OPERATORS,
 ): Promise<Vehicle[]> {
-    const [voi, tier, zvipp, lime] = await Promise.all([
-        getVoiScooters(),
-        getTierScooters(lat, lon, range),
-        getZvippScooters(),
-        getLimeScooters(),
-    ])
+    const scooters = await Promise.all(
+        operatorsWhitelist.map((operator) => {
+            switch (operator) {
+                case Operator.VOI:
+                    return getVoiScooters()
+                case Operator.TIER:
+                    return getTierScooters(lat, lon, range)
+                case Operator.ZVIPP:
+                    return getZvippScooters()
+                case Operator.LIME:
+                    return getLimeScooters()
+                default:
+                    return []
+            }
+        }),
+    )
 
-    return [...voi, ...tier, ...zvipp, ...lime]
+    return scooters.reduce((a, b) => [...a, ...b], [])
 }
 
 async function getTierScooters(lat: number, lon: number, range: number) {

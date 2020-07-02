@@ -23,8 +23,6 @@ The current project should be `entur-mobility-staging`. If it is not, then switc
 `firebase functions:config:get > .runtimeconfig.json`
 * Install correct node version:
 `nvm install 10.20`
-* Navigate to functions:
-`cd functions`
 * Install dependencies:
 `npm install`
 * Use correct node version:

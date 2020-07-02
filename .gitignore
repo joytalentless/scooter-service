@@ -68,7 +68,7 @@ node_modules/
 .idea
 
 ## Compiled JavaScript files
-functions/lib
+lib
 **/*.js.map
 
 # Typescript v1 declaration files

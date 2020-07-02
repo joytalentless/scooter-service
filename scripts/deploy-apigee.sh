@@ -23,17 +23,17 @@ function deploy {
 
     if [[ "$ENV" == "dev" ]]; then
         echo " 📝 Deploying new revision to Apigee dev ..."
-        npx apigeetool deployproxy -V -o $ORG -e dev -n $NAME -d api/mobility -u $APIGEEUSER -p $APIGEEPASSWORD
+        apigeetool deployproxy -V -o $ORG -e dev -n $NAME -d api/mobility -u $APIGEEUSER -p $APIGEEPASSWORD
     fi
 
-    APIGEEREVISION=$(npx apigeetool listdeployments -u $APIGEEUSER -p $APIGEEPASSWORD -o $ORG -n $NAME -j | jq '.deployments[] | select(.environment |contains("dev")) |.revision')
+    APIGEEREVISION=$(apigeetool listdeployments -u $APIGEEUSER -p $APIGEEPASSWORD -o $ORG -n $NAME -j | jq '.deployments[] | select(.environment |contains("dev")) |.revision')
 
     if [[ "$ENV" == "staging" ]]; then
         echo " 📝 Deploying revision $APIGEEREVISION to Apigee stage ..."
-        npx apigeetool deployExistingRevision -V -u $APIGEEUSER -p $APIGEEPASSWORD -o $ORG -e stage -n $NAME -r $APIGEEREVISION
+        apigeetool deployExistingRevision -V -u $APIGEEUSER -p $APIGEEPASSWORD -o $ORG -e stage -n $NAME -r $APIGEEREVISION
     elif [[ "$ENV" == "prod" ]]; then
         echo " 📝 Deploying revision $APIGEEREVISION to Apigee prod ..."
-        npx apigeetool deployExistingRevision -V -u $APIGEEUSER -p $APIGEEPASSWORD -o $ORG -e prod -n $NAME -r $APIGEEREVISION
+        apigeetool deployExistingRevision -V -u $APIGEEUSER -p $APIGEEPASSWORD -o $ORG -e prod -n $NAME -r $APIGEEREVISION
     fi
 
     echo -e "\n 🎉 Revision $APIGEEREVISION successfully deployed to $ENV!"

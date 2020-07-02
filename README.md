@@ -70,7 +70,7 @@ npm run deploy-prod
 Run
 
 ```
-./deploy-apigee.sh <dev|staging|prod>
+npm run deploy-apigee <dev|staging|prod>
 ```
 
 Fill in username and password when prompted.

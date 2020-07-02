@@ -57,12 +57,12 @@ with header: `ET-Client-Name: Entur`
 ## Deploy
 Deploy to staging:
 ```
-npm run stage
+npm run deploy:staging
 ```
 
 Deploy to production:
 ```
-npm run deploy-prod
+npm run deploy:prod
 ```
 
 ### Deploying API proxy to Apigee

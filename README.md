@@ -67,6 +67,18 @@ Deploy to production:
 npm run deploy-prod
 ```
 
+### Deploying API proxy to Apigee
+
+Run
+
+```
+./deploy-apigee.sh <dev|staging|prod>
+```
+
+Fill in username and password when prompted.
+
+You need to deploy to dev before deploying to staging or prod.
+
 ## Heatmap
 in the `public`-folder you can find a simple application showing a heatmap for scooters in Norway.
 For the map to be fully functional, you have to edit the html code and add the API-key for google maps.

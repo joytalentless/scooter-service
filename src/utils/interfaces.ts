@@ -6,6 +6,10 @@ export interface Vehicle {
     code?: string
     battery?: number
     batteryLevel?: string
+    rental_uris?: {
+        android: URL
+        ios: URL
+    }
 }
 
 export interface Voi {
@@ -46,6 +50,10 @@ export interface Lime {
     is_reserved: boolean
     is_disabled: boolean
     battery_level: string
+    rental_uris?: {
+        android: URL
+        ios: URL
+    }
 }
 
 export interface ScooterQuery {

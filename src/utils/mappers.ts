@@ -40,5 +40,6 @@ export function mapLime(limeScooters: Lime[]): Vehicle[] {
         lat: Number(l.lat),
         lon: Number(l.lon),
         batteryLevel: l.battery_level,
+        rental_uris: l.rental_uris,
     }))
 }

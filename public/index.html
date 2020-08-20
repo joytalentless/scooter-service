@@ -3,7 +3,6 @@
 <head>
     <title>Entur scooter dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/6.3.4/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/6.3.4/firebase-firestore.js"></script>
     <style>
         /* Always set the map height explicitly to define the size of the div
          * element that contains the map. */
@@ -36,21 +35,54 @@
     // Enter the google maps api key here!
     const googleMapsApiKey = ""
     let map;
-    function initMap() {
+    let center;
+    let range = 10000;
+
+    // Returns a function, that, as long as it continues to be invoked, will not
+    // be triggered. The function will be called after it stops being called for
+    // N milliseconds. If `immediate` is passed, trigger the function on the
+    // leading edge, instead of the trailing.
+    function debounce(func, wait, immediate) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func.apply(context, args);
+        };
+    };
+
+    let debouncedUpdateHeatmap = debounce(updateMapGeometries, 500);
+
+    function updateMapGeometries(event) {
+        center = map.getCenter();
+        range = Math.floor(google.maps.geometry.spherical.computeDistanceBetween(center, map.getBounds().getNorthEast()));
+        updateHeatmap();
+    }
+
+    window.initMap = function initMap() {
+        center = new google.maps.LatLng(59.925, 10.746)
         map = new google.maps.Map(document.getElementById('map'), {
             zoom: 13.5,
-            center: new google.maps.LatLng(59.925, 10.75),
-            mapTypeId: 'terrain',
-            disableDefaultUI: true,
-            gestureHandling: 'none',
+            center: center,
+            mapTypeId: 'terrain'
         });
 
         map.set('styles', mapStyle);
+        if (map.addListener) {
+            map.addListener('idle', debouncedUpdateHeatmap);
+        }
     }
 
     let heatmap;
     function updateHeatmap() {
-        fetch('https://api.entur.io/mobility/v1/scooters?lat=59.909&lon=10.746&range=10000&max=5000', {
+        document.getElementById("scooterCount").textContent = 'Loading...';
+        fetch(`https://api.entur.io/mobility/v1/scooters?lat=${center.lat()}&lon=${center.lng()}&range=${range}&max=50000`, {
             method: 'GET',
             headers: {
                 'ET-Client-Name': 'entur - scooter-dashboard'
@@ -61,11 +93,13 @@
                 let heatmapData = [];
                 json.forEach((scooter) => {
                     let latLng = new google.maps.LatLng(scooter.lat, scooter.lon);
-                    heatmapData.push(latLng);
+                    if (map.getBounds().contains(latLng)) {
+                        heatmapData.push(latLng);
+                    }
                 });
 
                 if (heatmap) {
-                    heatmap.set('data', heatmapData);
+                    heatmap.setData(heatmapData);
                 } else {
                     heatmap = new google.maps.visualization.HeatmapLayer({
                         data: heatmapData,
@@ -74,12 +108,10 @@
                         map: map
                     });
                 }
-
-                document.getElementById("scooterCount").textContent = json.length;
+                document.getElementById("scooterCount").textContent = heatmapData.length;
             });
     }
 
-    updateHeatmap();
     setInterval(updateHeatmap, 60000);
 
     let mapStyle = [
@@ -343,7 +375,7 @@
     let googleMap = document.createElement('script')
     googleMap.async = true
     googleMap.defer = true
-    googleMap.src = `https://maps.googleapis.com/maps/api/js?${googleMapsApiKey ? `key=${googleMapsApiKey}&` : ''}libraries=visualization&callback=initMap`
+    googleMap.src = `https://maps.googleapis.com/maps/api/js?${googleMapsApiKey ? `key=${googleMapsApiKey}&` : ''}libraries=visualization,geometry&callback=initMap`
     document.body.appendChild(googleMap)
 </script>
 </body>

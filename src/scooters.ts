@@ -85,12 +85,11 @@ export const scooters = functions.region('europe-west1').https.onRequest(
                 operatorsWhitelist,
             )
             const closestVehicles: Vehicle[] = vehicles
-                .sort((v1, v2) => {
-                    return (
+                .sort(
+                    (v1, v2) =>
                         distance(lat, lon, v1.lat, v1.lon) -
-                        distance(lat, lon, v2.lat, v2.lon)
-                    )
-                })
+                        distance(lat, lon, v2.lat, v2.lon),
+                )
                 .slice(0, max)
 
             console.log(
@@ -127,7 +126,13 @@ async function getScooters(
         }),
     )
 
-    return scooters.reduce((a, b) => [...a, ...b], [])
+    return scooters
+        .reduce((a, b) => [...a, ...b], [])
+        .filter(
+            (vehicle: Vehicle) =>
+                vehicle.operator === Operator.TIER ||
+                distance(lat, lon, vehicle.lat, vehicle.lon) <= range,
+        )
 }
 
 async function getTierScooters(lat: number, lon: number, range: number) {

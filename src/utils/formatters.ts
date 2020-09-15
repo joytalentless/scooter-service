@@ -5,10 +5,19 @@ const formatDecimals = (price: number, locale: 'en' | 'no') => {
         ? [integer, fraction.padEnd(2, '0')].join(locale === 'en' ? '.' : ',')
         : integer
 }
+
+enum Locale {
+    Bokmal = 'nob',
+    Nynorsk = 'nno',
+    English = 'eng',
+}
+
+type MultilingualString = Record<Locale, string>
+
 export const formatPriceToText = (
     startPrice: number,
     pricePerMinute: number,
-) => ({
+): MultilingualString => ({
     nob: `${formatDecimals(startPrice, 'no')} kr i oppstart + ${formatDecimals(
         pricePerMinute,
         'no',

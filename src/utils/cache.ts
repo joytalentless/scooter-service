@@ -20,6 +20,11 @@ const cache: Record<Operator, VehicleCache> = {
 export function getCachedScooters(operator: Operator, fetchVehicles: () => Promise<Vehicle[]>) {
     const vehicleCache = cache[operator];
 
+    // not possible to cache TIER without a spatial index
+    if (operator === Operator.TIER) {
+      return fetchVehicles();
+    }
+
     if (vehicleCache.vehicles === null) {
 
         if (vehicleCache.isFetching) {

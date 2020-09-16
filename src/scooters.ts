@@ -116,7 +116,7 @@ async function getScooters(
                 case Operator.VOI:
                     return getCachedScooters(operator, () => getVoiScooters())
                 case Operator.TIER:
-                    return getCachedScooters(operator, () => getTierScooters(lat, lon, range))
+                    return getTierScooters(lat, lon, range)
                 case Operator.ZVIPP:
                     return getCachedScooters(operator, () => getZvippScooters())
                 case Operator.LIME:

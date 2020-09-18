@@ -55,7 +55,7 @@ export async function getCachedScooters(
                 return freshVehicles
             })
             .catch((e) => {
-                logError(operator, `error hydrating vehicle cache: ${e}`)
+                logError(operator, e, `error hydrating vehicle cache`)
                 return []
             })
     }

@@ -11,6 +11,7 @@ import { ScooterQuery, Vehicle, Voi, Zvipp, Lime } from './utils/interfaces'
 import { capitalizeFirstLetter, logError } from './utils/logging'
 import { mapTier, mapVoi, mapZvipp, mapLime } from './utils/mappers'
 import { Operator, isOperatorName, ALL_OPERATORS } from './utils/operators'
+import { getCachedScooters } from './utils/cache'
 
 let voiSessionKey = ''
 
@@ -113,13 +114,13 @@ async function getScooters(
         operatorsWhitelist.map((operator) => {
             switch (operator) {
                 case Operator.VOI:
-                    return getVoiScooters()
+                    return getCachedScooters(operator, () => getVoiScooters())
                 case Operator.TIER:
                     return getTierScooters(lat, lon, range)
                 case Operator.ZVIPP:
-                    return getZvippScooters()
+                    return getCachedScooters(operator, () => getZvippScooters())
                 case Operator.LIME:
-                    return getLimeScooters()
+                    return getCachedScooters(operator, () => getLimeScooters())
                 default:
                     return []
             }

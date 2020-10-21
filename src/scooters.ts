@@ -21,7 +21,9 @@ import { Operator, isOperatorName, ALL_OPERATORS } from './utils/operators'
 import { getCachedScooters } from './utils/cache'
 
 let voiSessionKey = ''
+let boltOsloToken = ''
 let boltLillestromToken = ''
+let boltFredrikstadToken = ''
 
 const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
@@ -273,17 +275,17 @@ async function getLimeScooters() {
 
 async function getBoltScooters() {
     if (toggles().voi === 'off') {
-        console.log(`${capitalizeFirstLetter(Operator.VOI)} is toggled off`)
+        console.log(`${capitalizeFirstLetter(Operator.BOLT)} is toggled off`)
         return []
     }
 
     try {
-        return await boltLillestromRequest()
+        return await boltRequests()
     } catch (err) {
         if (err && err.status === 401) {
             try {
-                await refreshLillestromToken()
-                return await boltLillestromRequest()
+                await refreshBoltTokens()
+                return await boltRequests()
             } catch (e) {
                 console.error(e)
                 return []
@@ -295,32 +297,73 @@ async function getBoltScooters() {
     }
 }
 
-async function boltLillestromRequest() {
-    const boltLillestromResponse: request.Response = await request
-        .get(`${functions.config().bolt.url.lillestrom}`)
-        .set('Authorization', `Bearer ${boltLillestromToken}`)
-        .set('Accept', 'application/json')
-    const boltLillestrom: Bolt[] = JSON.parse(boltLillestromResponse.text).data
-        .bikes
-
-    return mapBolt(
-        boltLillestrom.filter((v) => !v.is_disabled && !v.is_reserved),
-        'lillestrom',
-    )
+async function boltRequests() {
+    return [
+        ...mapBolt(
+            await boltRequest(functions.config().bolt.url.oslo, boltOsloToken),
+            'oslo',
+        ),
+        ...mapBolt(
+            await boltRequest(
+                functions.config().bolt.url.lillestrom,
+                boltLillestromToken,
+            ),
+            'lillestrom',
+        ),
+        ...mapBolt(
+            await boltRequest(
+                functions.config().bolt.url.fredrikstad,
+                boltFredrikstadToken,
+            ),
+            'fredrikstad',
+        ),
+    ]
 }
 
-async function refreshLillestromToken() {
-    console.log(`Refreshing ${Operator.BOLT} session key..`)
+async function boltRequest(url: string, token: string): Promise<Bolt[]> {
+    const boltResponse: request.Response = await request
+        .get(url)
+        .set('Authorization', `Bearer ${token}`)
+        .set('Accept', 'application/json')
+    const bolt: Bolt[] = JSON.parse(boltResponse.text).data.bikes
+    return bolt.filter((v) => !v.is_disabled && !v.is_reserved)
+}
+
+async function refreshBoltTokens() {
+    console.log(`Refreshing ${Operator.BOLT} tokens`)
+    try {
+        boltOsloToken = await refreshBoltToken(
+            functions.config().bolt.api.oslo.user,
+            functions.config().bolt.api.oslo.pass,
+        )
+        boltLillestromToken = await refreshBoltToken(
+            functions.config().bolt.api.lillestrom.user,
+            functions.config().bolt.api.lillestrom.pass,
+        )
+        boltFredrikstadToken = await refreshBoltToken(
+            functions.config().bolt.api.fredrikstad.user,
+            functions.config().bolt.api.fredrikstad.pass,
+        )
+    } catch (err) {
+        logError(Operator.VOI, err, 'Failed to refresh session key')
+    }
+}
+
+async function refreshBoltToken(user: string, pass: string): Promise<string> {
+    console.log(
+        `Refreshing ${Operator.BOLT.toLowerCase()} token with user ${user}`,
+    )
     try {
         const res: request.Response = await request
             .post(`${functions.config().bolt.url.auth}`)
             .set('Content-Type', 'application/json')
             .send({
-                user_name: functions.config().bolt.api.lillestrom.user,
-                user_pass: functions.config().bolt.api.lillestrom.pass,
+                user_name: user,
+                user_pass: pass,
             })
-        boltLillestromToken = JSON.parse(res.text).access_token
+        return JSON.parse(res.text).access_token
     } catch (err) {
         logError(Operator.VOI, err, 'Failed to refresh session key')
+        return Promise.reject()
     }
 }

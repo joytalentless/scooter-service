@@ -292,8 +292,7 @@ async function boltLillestromRequest() {
     const boltLillestromResponse: request.Response = await request
         .get(`${functions.config().bolt.url.lillestrom}`)
         .set('Authorization', `Bearer ${boltLillestromToken}`)
-        .set('X-Voigbfs-Ext', 'Battery')
-        .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
+        .set('Accept', 'application/json')
     const boltLillestrom: Bolt[] = JSON.parse(boltLillestromResponse.text).data.bikes
 
     return mapBolt(

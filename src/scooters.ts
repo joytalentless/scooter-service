@@ -296,8 +296,9 @@ async function boltLillestromRequest() {
     const boltLillestrom: Bolt[] = JSON.parse(boltLillestromResponse.text).data.bikes
 
     return mapBolt(
-        boltLillestrom
-            .filter((v) => !v.is_disabled && !v.is_reserved))
+        boltLillestrom.filter((v) => !v.is_disabled && !v.is_reserved),
+        'lillestrom'
+    )
 }
 
 async function refreshLillestromToken() {

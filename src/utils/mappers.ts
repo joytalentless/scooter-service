@@ -44,10 +44,10 @@ export function mapLime(limeScooters: Lime[]): Vehicle[] {
     }))
 }
 
-export function mapBolt(boltScooters: Bolt[]): Vehicle[] {
+export function mapBolt(boltScooters: Bolt[], operator_city: String): Vehicle[] {
     return boltScooters.map((b: Bolt) => ({
         id: getNeTExId(b.bike_id.toString(), Operator.BOLT),
-        operator: Operator.BOLT.toLowerCase(),
+        operator: `${Operator.BOLT.toLowerCase()}_${operator_city}`,
         lat: Number(b.lat),
         lon: Number(b.lon),
     }))

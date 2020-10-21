@@ -3,6 +3,7 @@ export enum Operator {
     TIER = 'TIER',
     ZVIPP = 'ZVIPP',
     LIME = 'LIME',
+    BOLT = 'BOLT'
 }
 
 export const ALL_OPERATORS = Object.values(Operator)
@@ -17,6 +18,8 @@ const getCodespace = (operator: Operator): string => {
             return 'YZV'
         case Operator.LIME:
             return 'YLI'
+        case Operator.BOLT:
+            return 'YBO'
     }
 }
 

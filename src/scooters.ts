@@ -7,13 +7,14 @@ import {
 } from './utils/constants'
 import { distance } from './utils/distance'
 import { toggles } from './utils/firebase'
-import { ScooterQuery, Vehicle, Voi, Zvipp, Lime } from './utils/interfaces'
+import { ScooterQuery, Vehicle, Voi, Zvipp, Lime, Bolt } from './utils/interfaces'
 import { capitalizeFirstLetter, logError } from './utils/logging'
-import { mapTier, mapVoi, mapZvipp, mapLime } from './utils/mappers'
+import { mapTier, mapVoi, mapZvipp, mapLime, mapBolt } from './utils/mappers'
 import { Operator, isOperatorName, ALL_OPERATORS } from './utils/operators'
 import { getCachedScooters } from './utils/cache'
 
 let voiSessionKey = ''
+let boltLillestromToken = ''
 
 const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
@@ -264,5 +265,54 @@ async function getLimeScooters() {
 }
 
 async function getBoltScooters() {
-    return []
+    if (toggles().voi === 'off') {
+        console.log(`${capitalizeFirstLetter(Operator.VOI)} is toggled off`)
+        return []
+    }
+
+    try {
+        return await boltLillestromRequest()
+    } catch (err) {
+        if (err && err.status === 401) {
+            try {
+                await refreshLillestromToken()
+                return await boltLillestromRequest()
+            } catch (e) {
+                console.error(e)
+                return []
+            }
+        } else {
+            logError(Operator.BOLT, err)
+            return []
+        }
+    }
+}
+
+async function boltLillestromRequest() {
+    const boltLillestromResponse: request.Response = await request
+        .get(`${functions.config().bolt.url.lillestrom}`)
+        .set('Authorization', `Bearer ${boltLillestromToken}`)
+        .set('X-Voigbfs-Ext', 'Battery')
+        .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
+    const boltLillestrom: Bolt[] = JSON.parse(boltLillestromResponse.text).data.bikes
+
+    return mapBolt(
+        boltLillestrom
+            .filter((v) => !v.is_disabled && !v.is_reserved))
+}
+
+async function refreshLillestromToken() {
+    console.log(`Refreshing ${Operator.BOLT} session key..`)
+    try {
+        const res: request.Response = await request
+            .post(`${functions.config().bolt.url.auth}`)
+            .set('Content-Type', 'application/json')
+            .send({
+                'user_name': functions.config().bolt.api.lillestrom.user,
+                'user_pass': functions.config().bolt.api.lillestrom.pass
+            })
+        boltLillestromToken = JSON.parse(res.text).access_token
+    } catch (err) {
+        logError(Operator.VOI, err, 'Failed to refresh session key')
+    }
 }

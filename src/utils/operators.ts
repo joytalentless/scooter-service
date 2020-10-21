@@ -16,7 +16,7 @@ const getCodespace = (operator: Operator): string => {
         case Operator.ZVIPP:
             return 'YZV'
         case Operator.LIME:
-            return 'LIM'
+            return 'YLI'
     }
 }
 

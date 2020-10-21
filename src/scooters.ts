@@ -121,6 +121,8 @@ async function getScooters(
                     return getCachedScooters(operator, () => getZvippScooters())
                 case Operator.LIME:
                     return getCachedScooters(operator, () => getLimeScooters())
+                case Operator.BOLT:
+                    return getCachedScooters(operator, () => getBoltScooters())
                 default:
                     return []
             }
@@ -259,4 +261,8 @@ async function getLimeScooters() {
         logError(Operator.LIME, err)
         return []
     }
+}
+
+async function getBoltScooters() {
+    return []
 }

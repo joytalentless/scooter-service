@@ -3,7 +3,7 @@ export enum Operator {
     TIER = 'TIER',
     ZVIPP = 'ZVIPP',
     LIME = 'LIME',
-    BOLT = 'BOLT'
+    BOLT = 'BOLT',
 }
 
 export const ALL_OPERATORS = Object.values(Operator)

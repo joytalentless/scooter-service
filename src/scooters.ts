@@ -7,7 +7,14 @@ import {
 } from './utils/constants'
 import { distance } from './utils/distance'
 import { toggles } from './utils/firebase'
-import { ScooterQuery, Vehicle, Voi, Zvipp, Lime, Bolt } from './utils/interfaces'
+import {
+    ScooterQuery,
+    Vehicle,
+    Voi,
+    Zvipp,
+    Lime,
+    Bolt,
+} from './utils/interfaces'
 import { capitalizeFirstLetter, logError } from './utils/logging'
 import { mapTier, mapVoi, mapZvipp, mapLime, mapBolt } from './utils/mappers'
 import { Operator, isOperatorName, ALL_OPERATORS } from './utils/operators'
@@ -293,11 +300,12 @@ async function boltLillestromRequest() {
         .get(`${functions.config().bolt.url.lillestrom}`)
         .set('Authorization', `Bearer ${boltLillestromToken}`)
         .set('Accept', 'application/json')
-    const boltLillestrom: Bolt[] = JSON.parse(boltLillestromResponse.text).data.bikes
+    const boltLillestrom: Bolt[] = JSON.parse(boltLillestromResponse.text).data
+        .bikes
 
     return mapBolt(
         boltLillestrom.filter((v) => !v.is_disabled && !v.is_reserved),
-        'lillestrom'
+        'lillestrom',
     )
 }
 
@@ -308,8 +316,8 @@ async function refreshLillestromToken() {
             .post(`${functions.config().bolt.url.auth}`)
             .set('Content-Type', 'application/json')
             .send({
-                'user_name': functions.config().bolt.api.lillestrom.user,
-                'user_pass': functions.config().bolt.api.lillestrom.pass
+                user_name: functions.config().bolt.api.lillestrom.user,
+                user_pass: functions.config().bolt.api.lillestrom.pass,
             })
         boltLillestromToken = JSON.parse(res.text).access_token
     } catch (err) {

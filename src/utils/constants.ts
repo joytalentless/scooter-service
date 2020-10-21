@@ -35,6 +35,12 @@ export const defaultScooterPrice: ScooterPrice = {
     startPrice: 10,
     pricePerMinute: 2.5,
 }
+
+export const boltLillestromScooterPrise: ScooterPrice = {
+    startPrice: 5,
+    pricePerMinute: 2.5,
+}
+
 export const scooterPrices: priceTexts = {
     voi: formatPriceToText(
         defaultScooterPrice.startPrice,
@@ -45,4 +51,8 @@ export const scooterPrices: priceTexts = {
         defaultScooterPrice.pricePerMinute,
     ),
     zvipp: formatPriceToText(defaultScooterPrice.startPrice, 3),
+    bolt_lillestrom: formatPriceToText(
+        boltLillestromScooterPrise.startPrice,
+        boltLillestromScooterPrise.pricePerMinute,
+    ),
 }

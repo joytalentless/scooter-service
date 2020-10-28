@@ -345,7 +345,7 @@ async function refreshBoltTokens() {
             functions.config().bolt.api.fredrikstad.pass,
         )
     } catch (err) {
-        logError(Operator.VOI, err, 'Failed to refresh session key')
+        logError(Operator.BOLT, err, 'Failed to refresh session key')
     }
 }
 
@@ -363,7 +363,7 @@ async function refreshBoltToken(user: string, pass: string): Promise<string> {
             })
         return JSON.parse(res.text).access_token
     } catch (err) {
-        logError(Operator.VOI, err, 'Failed to refresh session key')
+        logError(Operator.BOLT, err, 'Failed to refresh session key')
         return Promise.reject()
     }
 }

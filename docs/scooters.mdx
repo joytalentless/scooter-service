@@ -40,6 +40,22 @@ Read more about the `ET-Client-Name` header in the  [introduction](/pages-intro-
 
 This is both to be able to monitor the usage, and to inform consumers when we introduce important changes.
 
+## Response
+
+The endpoint returns a JSON array of scooter objects.
+
+New fields might be added along with new operators. Please consider using the `operators` whitelist parameter if predictability is important for you.
+
+| Property       | Type   | Optional? |
+|:---------------|:-------|:----------|
+| `id`           | string | No        |
+| `operator`     | string | No        |
+| `lat`          | number | No        |
+| `lon`          | number | No        |
+| `code`         | string | Yes       |
+| `battery`      | number | Yes       |
+| `batteryLevel` | string | Yes       |
+
 ### Example response
 ```
 [

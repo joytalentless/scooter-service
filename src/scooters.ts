@@ -274,7 +274,7 @@ async function getLimeScooters() {
 }
 
 async function getBoltScooters() {
-    if (toggles().voi === 'off') {
+    if (toggles().bolt === 'off') {
         console.log(`${capitalizeFirstLetter(Operator.BOLT)} is toggled off`)
         return []
     }

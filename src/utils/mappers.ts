@@ -1,5 +1,5 @@
 import { Tier, Vehicle, Voi, Zvipp, Lime, Bolt } from './interfaces'
-import { getNeTExId, Operator } from './operators'
+import { BoltOperatorCity, getNeTExId, Operator } from './operators'
 
 export function mapVoi(voiScooters: Voi[]): Vehicle[] {
     return voiScooters.map((v: Voi) => ({
@@ -46,11 +46,12 @@ export function mapLime(limeScooters: Lime[]): Vehicle[] {
 
 export function mapBolt(
     boltScooters: Bolt[],
-    operator_city: string,
+    operatorCity: BoltOperatorCity,
 ): Vehicle[] {
     return boltScooters.map((b: Bolt) => ({
         id: getNeTExId(b.bike_id.toString(), Operator.BOLT),
-        operator: `${Operator.BOLT.toLowerCase()}_${operator_city}`,
+        operator: Operator.BOLT.toLowerCase(),
+        city: operatorCity.toLowerCase(),
         lat: Number(b.lat),
         lon: Number(b.lon),
     }))

@@ -30,3 +30,9 @@ export function getNeTExId(id: string, operator: Operator): string {
 export function isOperatorName(name: string): name is Operator {
     return name in Operator
 }
+
+export enum BoltOperatorCity {
+    OSLO = 'OSLO',
+    LILLESTROM = 'LILLESTROM',
+    FREDRIKSTAD = 'FREDRIKSTAD',
+}

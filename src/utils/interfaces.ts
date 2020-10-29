@@ -56,6 +56,14 @@ export interface Lime {
     }
 }
 
+export interface Bolt {
+    bike_id: string
+    lat: number
+    lon: number
+    is_reserved: boolean
+    is_disabled: boolean
+}
+
 export interface ScooterQuery {
     lat?: string
     lon?: string

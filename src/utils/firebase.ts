@@ -5,6 +5,7 @@ interface Toggles {
     tier?: 'off'
     voi?: 'off'
     zvipp?: 'off'
+    bolt?: 'off'
 }
 
 export const toggles = (): Toggles => functions.config().toggles || {}

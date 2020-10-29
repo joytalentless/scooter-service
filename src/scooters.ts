@@ -7,13 +7,28 @@ import {
 } from './utils/constants'
 import { distance } from './utils/distance'
 import { toggles } from './utils/firebase'
-import { ScooterQuery, Vehicle, Voi, Zvipp, Lime } from './utils/interfaces'
+import {
+    ScooterQuery,
+    Vehicle,
+    Voi,
+    Zvipp,
+    Lime,
+    Bolt,
+} from './utils/interfaces'
 import { capitalizeFirstLetter, logError } from './utils/logging'
-import { mapTier, mapVoi, mapZvipp, mapLime } from './utils/mappers'
-import { Operator, isOperatorName, ALL_OPERATORS } from './utils/operators'
+import { mapTier, mapVoi, mapZvipp, mapLime, mapBolt } from './utils/mappers'
+import {
+    Operator,
+    isOperatorName,
+    ALL_OPERATORS,
+    BoltOperatorCity,
+} from './utils/operators'
 import { getCachedScooters } from './utils/cache'
 
 let voiSessionKey = ''
+let boltOsloToken = ''
+let boltLillestromToken = ''
+let boltFredrikstadToken = ''
 
 const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
@@ -121,6 +136,8 @@ async function getScooters(
                     return getCachedScooters(operator, () => getZvippScooters())
                 case Operator.LIME:
                     return getCachedScooters(operator, () => getLimeScooters())
+                case Operator.BOLT:
+                    return getCachedScooters(operator, () => getBoltScooters())
                 default:
                     return []
             }
@@ -258,5 +275,100 @@ async function getLimeScooters() {
     } catch (err) {
         logError(Operator.LIME, err)
         return []
+    }
+}
+
+async function getBoltScooters() {
+    if (toggles().bolt === 'off') {
+        console.log(`${capitalizeFirstLetter(Operator.BOLT)} is toggled off`)
+        return []
+    }
+
+    try {
+        return await boltRequests()
+    } catch (err) {
+        if (err && err.status === 401) {
+            try {
+                await refreshBoltTokens()
+                return await boltRequests()
+            } catch (e) {
+                console.error(e)
+                return []
+            }
+        } else {
+            logError(Operator.BOLT, err)
+            return []
+        }
+    }
+}
+
+async function boltRequests() {
+    return [
+        ...mapBolt(
+            await boltRequest(functions.config().bolt.url.oslo, boltOsloToken),
+            BoltOperatorCity.OSLO,
+        ),
+        ...mapBolt(
+            await boltRequest(
+                functions.config().bolt.url.lillestrom,
+                boltLillestromToken,
+            ),
+            BoltOperatorCity.LILLESTROM,
+        ),
+        ...mapBolt(
+            await boltRequest(
+                functions.config().bolt.url.fredrikstad,
+                boltFredrikstadToken,
+            ),
+            BoltOperatorCity.FREDRIKSTAD,
+        ),
+    ]
+}
+
+async function boltRequest(url: string, token: string): Promise<Bolt[]> {
+    const boltResponse: request.Response = await request
+        .get(url)
+        .set('Authorization', `Bearer ${token}`)
+        .set('Accept', 'application/json')
+    const bolt: Bolt[] = JSON.parse(boltResponse.text).data.bikes
+    return bolt.filter((v) => !v.is_disabled && !v.is_reserved)
+}
+
+async function refreshBoltTokens() {
+    console.log(`Refreshing ${Operator.BOLT} tokens`)
+    try {
+        boltOsloToken = await refreshBoltToken(
+            functions.config().bolt.api.oslo.user,
+            functions.config().bolt.api.oslo.pass,
+        )
+        boltLillestromToken = await refreshBoltToken(
+            functions.config().bolt.api.lillestrom.user,
+            functions.config().bolt.api.lillestrom.pass,
+        )
+        boltFredrikstadToken = await refreshBoltToken(
+            functions.config().bolt.api.fredrikstad.user,
+            functions.config().bolt.api.fredrikstad.pass,
+        )
+    } catch (err) {
+        logError(Operator.BOLT, err, 'Failed to refresh session key')
+    }
+}
+
+async function refreshBoltToken(user: string, pass: string): Promise<string> {
+    console.log(
+        `Refreshing ${Operator.BOLT.toLowerCase()} token with user ${user}`,
+    )
+    try {
+        const res: request.Response = await request
+            .post(`${functions.config().bolt.url.auth}`)
+            .set('Content-Type', 'application/json')
+            .send({
+                user_name: user,
+                user_pass: pass,
+            })
+        return JSON.parse(res.text).access_token
+    } catch (err) {
+        logError(Operator.BOLT, err, 'Failed to refresh session key')
+        return Promise.reject()
     }
 }

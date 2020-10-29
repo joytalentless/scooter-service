@@ -31,6 +31,11 @@ const cache: Record<Operator, VehicleCache> = {
         isFetching: false,
         fetcherPromise: null,
     },
+    [Operator.BOLT]: {
+        lastFetched: null,
+        isFetching: false,
+        fetcherPromise: null,
+    },
 }
 
 const expired = (lastFetched: Date | null) =>

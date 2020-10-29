@@ -3,6 +3,7 @@ export enum Operator {
     TIER = 'TIER',
     ZVIPP = 'ZVIPP',
     LIME = 'LIME',
+    BOLT = 'BOLT',
 }
 
 export const ALL_OPERATORS = Object.values(Operator)
@@ -16,7 +17,9 @@ const getCodespace = (operator: Operator): string => {
         case Operator.ZVIPP:
             return 'YZV'
         case Operator.LIME:
-            return 'LIM'
+            return 'YLI'
+        case Operator.BOLT:
+            return 'YBO'
     }
 }
 
@@ -26,4 +29,10 @@ export function getNeTExId(id: string, operator: Operator): string {
 
 export function isOperatorName(name: string): name is Operator {
     return name in Operator
+}
+
+export enum BoltOperatorCity {
+    OSLO = 'OSLO',
+    LILLESTROM = 'LILLESTROM',
+    FREDRIKSTAD = 'FREDRIKSTAD',
 }

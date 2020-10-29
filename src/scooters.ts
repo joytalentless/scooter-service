@@ -17,7 +17,12 @@ import {
 } from './utils/interfaces'
 import { capitalizeFirstLetter, logError } from './utils/logging'
 import { mapTier, mapVoi, mapZvipp, mapLime, mapBolt } from './utils/mappers'
-import { Operator, isOperatorName, ALL_OPERATORS, BoltOperatorCity } from './utils/operators'
+import {
+    Operator,
+    isOperatorName,
+    ALL_OPERATORS,
+    BoltOperatorCity,
+} from './utils/operators'
 import { getCachedScooters } from './utils/cache'
 
 let voiSessionKey = ''

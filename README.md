@@ -1,11 +1,10 @@
-# Mobility functions
+# Mobility Functions
 
 The Entur-Mobility app is an api that contains two endpoints.
 * `scooters` close to a user-specified location.
 * `prices` for mobility services such as scooters and city bikes.
 
-
-## ./functions
+[📒 Official API documentation](https://developer.entur.org/pages-mobility-docs-scooters)
 
 The api runs on `firebase`, in terms of functions, hence the
 `firebase`-[CLI](https://firebase.google.com/docs/cli) and the [Google Cloud SDK](https://cloud.google.com/sdk/) are required.
@@ -17,38 +16,31 @@ The current project should be `entur-mobility-staging`. If it is not, then switc
 
 ## Run app
 
-* Install firebase:
-`curl -sL https://firebase.tools | bash`
-* Set configs:
-`firebase functions:config:get > .runtimeconfig.json`
-* Install correct node version:
-`nvm install 10.20`
-* Install dependencies:
-`npm install`
-* Use correct node version:
-`nvm use v10.20`
-* Build project and start emulator:
-`npm start`
+First of all, make sure you have version 10 or higher of Node.js installed.
+
+* Install dependencies: `npm install`
+* Download config variables: `npm run get-config`
+* Build project and start emulator: `npm start`
 
 Now, the app is running on localhost.
 
-## Api
+## API
 
 The app can live in three different environments, with the following root:
 * localhost: `http://localhost:5001/entur-mobility-staging/europe-west1`
-* staging `https://api.staging.entur.io/mobility/v1/`
-* production `https://api.entur.io/mobility/v1`
+* staging: `https://api.staging.entur.io/mobility/v1/`
+* production: `https://api.entur.io/mobility/v1`
 
 
 ### Example requests
-####Get scooters close to a specified position:
+#### Get scooters close to a specified position:
 
 ```
 GET http://localhost:5001/entur-mobility-staging/europe-west1/scooters?lat=59.909&lon=10.746
 ```
 with header: `ET-Client-Name: Entur`
 
-####Get scooter and city bikes prices:
+#### Get scooter and city bikes prices:
 ```
 http://localhost:5001/entur-mobility-staging/europe-west1/prices
 ```

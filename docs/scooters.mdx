@@ -10,7 +10,7 @@ This endpoint returns all scooters near a specified coordinate (latitude and lon
 sorted by their distance to the coordinate. You can limit the results with a range (radius)
 from the coordinate, and by the maximum number of scooters you wish to receive.
 
-At the time of writing, we have data from Tier, Voi, Zvipp, and Lime.
+At the time of writing, we have data from Tier, Voi, Zvipp, Lime and Bolt.
 
 ### HTTP Request
 `GET https://api.entur.io/mobility/v1/scooters?lat=59.909&lon=10.746`
@@ -55,6 +55,7 @@ New fields might be added along with new operators. Please consider using the `o
 | `code`         | string | Yes       |
 | `battery`      | number | Yes       |
 | `batteryLevel` | string | Yes       |
+| `city`         | string | Yes       |
 
 ### Example response
 ```

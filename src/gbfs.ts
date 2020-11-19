@@ -56,13 +56,13 @@ app.get(
     '/gbfs',
     async (req, res): Promise<void> => {
         try {
-            const { last_updated, ttl }: any = await boltRequest(
+            const { last_updated }: any = await boltRequest(
                 'https://mds.bolt.eu/gbfs/1/74/gbfs',
                 await getToken(),
             )
             const response: GBFS = {
                 last_updated,
-                ttl,
+                ttl: 300,
                 version: '2.1',
                 data: {
                     en: {
@@ -105,7 +105,6 @@ app.get(
         try {
             const {
                 last_updated,
-                ttl,
                 data: { system_id, language, name, url, timezone },
             }: any = await boltRequest(
                 'https://mds.bolt.eu/gbfs/1/74/system_information',
@@ -113,7 +112,7 @@ app.get(
             )
             const response: SystemInformation = {
                 last_updated,
-                ttl,
+                ttl: 300,
                 version: '2.1',
                 data: {
                     system_id: `YBO:System:${system_id}Oslo`,
@@ -135,13 +134,13 @@ app.get(
     '/gbfs/vehicle_types',
     async (req, res): Promise<void> => {
         try {
-            const { last_updated, ttl }: any = await boltRequest(
+            const { last_updated }: any = await boltRequest(
                 'https://mds.bolt.eu/gbfs/1/74/gbfs',
                 await getToken(),
             )
             const response: VehicleTypes = {
                 last_updated,
-                ttl,
+                ttl: 300,
                 version: '2.1',
                 data: {
                     vehicle_types: [
@@ -201,13 +200,13 @@ app.get(
     '/gbfs/system_regions',
     async (req, res): Promise<void> => {
         try {
-            const { last_updated, ttl }: any = await boltRequest(
+            const { last_updated }: any = await boltRequest(
                 'https://mds.bolt.eu/gbfs/1/74/gbfs',
                 await getToken(),
             )
             const response: SystemRegions = {
                 last_updated,
-                ttl,
+                ttl: 300,
                 version: '2.1',
                 data: {
                     regions: [
@@ -230,13 +229,13 @@ app.get(
     '/gbfs/system_pricing_plans',
     async (req, res): Promise<void> => {
         try {
-            const { last_updated, ttl }: any = await boltRequest(
+            const { last_updated }: any = await boltRequest(
                 'https://mds.bolt.eu/gbfs/1/74/gbfs',
                 await getToken(),
             )
             const response: SystemPricingPlans = {
                 last_updated,
-                ttl,
+                ttl: 300,
                 version: '2.1',
                 data: {
                     plans: [

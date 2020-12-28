@@ -174,18 +174,16 @@ app.get(
                 ttl,
                 version: '2.1',
                 data: {
-                    bikes: [
-                        data.bikes.map((bike: any) => ({
-                            bike_id: `YBO:Scooter:${bike.bike_id}`,
-                            lat: bike.lat,
-                            lon: bike.lon,
-                            is_reserved: bike.is_reserved === 1,
-                            is_disabled: bike.is_disabled === 1,
-                            vehicle_type_id: 'YBO:VehicleType:Scooter',
-                            current_range_meters: 0,
-                            pricing_plan_id: 'YBO:PricingPlan:Basic',
-                        })),
-                    ],
+                    bikes: data.bikes.map((bike: any) => ({
+                        bike_id: `YBO:Scooter:${bike.bike_id}`,
+                        lat: bike.lat,
+                        lon: bike.lon,
+                        is_reserved: bike.is_reserved === 1,
+                        is_disabled: bike.is_disabled === 1,
+                        vehicle_type_id: 'YBO:VehicleType:Scooter',
+                        current_range_meters: 0,
+                        pricing_plan_id: 'YBO:PricingPlan:Basic',
+                    })),
                 },
             }
             res.send(response)

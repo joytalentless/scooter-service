@@ -1,5 +1,5 @@
 import { scooters } from './scooters'
 import { prices } from './mobilityPrices'
-import * as gbfs from './gbfs'
+import * as boltoslo from './boltoslo'
 
-export { scooters, prices, gbfs }
+export { scooters, prices, boltoslo }

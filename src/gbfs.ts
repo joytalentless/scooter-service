@@ -15,9 +15,9 @@ import * as express from 'express'
 import { logError } from './utils/logging'
 import { Operator } from './utils/operators'
 import {
-    boltOsloScooterPrise,
-    boltFredrikstadScooterPrise,
-    boltLillestromScooterPrise,
+    boltOsloScooterPrice,
+    boltFredrikstadScooterPrice,
+    boltLillestromScooterPrice,
     defaultScooterPrice,
     limeScooterPrice,
 } from './utils/constants'
@@ -274,11 +274,11 @@ function getSystemPricing<T extends keyof typeof Provider>(
 ): ScooterPrice {
     switch (provider) {
         case Provider.boltoslo:
-            return boltOsloScooterPrise
+            return boltOsloScooterPrice
         case Provider.boltfredrikstad:
-            return boltFredrikstadScooterPrise
+            return boltFredrikstadScooterPrice
         case Provider.boltlillestrom:
-            return boltLillestromScooterPrise
+            return boltLillestromScooterPrice
         case Provider.limeoslo:
             return limeScooterPrice
         default:

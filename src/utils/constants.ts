@@ -36,19 +36,24 @@ export const defaultScooterPrice: ScooterPrice = {
     pricePerMinute: 2.5,
 }
 
-export const boltOsloScooterPrise: ScooterPrice = {
+export const boltOsloScooterPrice: ScooterPrice = {
     startPrice: 0,
     pricePerMinute: 3.5,
 }
 
-export const boltLillestromScooterPrise: ScooterPrice = {
+export const boltLillestromScooterPrice: ScooterPrice = {
     startPrice: 5,
     pricePerMinute: 2.5,
 }
 
-export const boltFredrikstadScooterPrise: ScooterPrice = {
+export const boltFredrikstadScooterPrice: ScooterPrice = {
     startPrice: 10,
     pricePerMinute: 2.5,
+}
+
+export const limeScooterPrice: ScooterPrice = {
+    startPrice: 10,
+    pricePerMinute: 3.0,
 }
 
 export const scooterPrices: priceTexts = {
@@ -62,15 +67,19 @@ export const scooterPrices: priceTexts = {
     ),
     zvipp: formatPriceToText(defaultScooterPrice.startPrice, 3),
     bolt_oslo: formatPriceToText(
-        boltOsloScooterPrise.startPrice,
-        boltOsloScooterPrise.pricePerMinute,
+        boltOsloScooterPrice.startPrice,
+        boltOsloScooterPrice.pricePerMinute,
     ),
     bolt_lillestrom: formatPriceToText(
-        boltLillestromScooterPrise.startPrice,
-        boltLillestromScooterPrise.pricePerMinute,
+        boltLillestromScooterPrice.startPrice,
+        boltLillestromScooterPrice.pricePerMinute,
     ),
     bolt_fredrikstad: formatPriceToText(
-        boltFredrikstadScooterPrise.startPrice,
-        boltFredrikstadScooterPrise.pricePerMinute,
+        boltFredrikstadScooterPrice.startPrice,
+        boltFredrikstadScooterPrice.pricePerMinute,
+    ),
+    lime: formatPriceToText(
+        limeScooterPrice.startPrice,
+        limeScooterPrice.pricePerMinute,
     ),
 }

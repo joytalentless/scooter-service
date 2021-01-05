@@ -35,4 +35,5 @@ export enum BoltOperatorCity {
     OSLO = 'OSLO',
     LILLESTROM = 'LILLESTROM',
     FREDRIKSTAD = 'FREDRIKSTAD',
+    BERGEN = 'BERGEN',
 }

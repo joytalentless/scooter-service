@@ -18,6 +18,7 @@ import {
     boltOsloScooterPrice,
     boltFredrikstadScooterPrice,
     boltLillestromScooterPrice,
+    boltBergenScooterPrice,
     defaultScooterPrice,
     limeScooterPrice,
 } from './utils/constants'
@@ -30,6 +31,7 @@ enum Provider {
     boltoslo = 'boltoslo',
     boltlillestrom = 'boltlillestrom',
     boltfredrikstad = 'boltfredrikstad',
+    boltbergen = 'boltbergen',
 }
 
 enum Feed {
@@ -279,6 +281,8 @@ function getSystemPricing<T extends keyof typeof Provider>(
             return boltFredrikstadScooterPrice
         case Provider.boltlillestrom:
             return boltLillestromScooterPrice
+        case Provider.boltbergen:
+            return boltBergenScooterPrice
         case Provider.limeoslo:
             return limeScooterPrice
         default:
@@ -296,6 +300,7 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
         case Provider.boltoslo:
         case Provider.boltfredrikstad:
         case Provider.boltlillestrom:
+        case Provider.boltbergen:
             return 'YBO'
         default:
             throw new Error('Unknown provider')
@@ -339,6 +344,10 @@ function getFeedUrl<
             return functions
                 .config()
                 .bolt.url.lillestrom.replace('free_bike_status', feed)
+        case Provider.boltbergen:
+            return functions
+                .config()
+                .bolt.url.bergen.replace('free_bike_status', feed)
         default:
             throw new Error('Unknown provider')
     }
@@ -359,6 +368,8 @@ async function getBearerToken<T extends keyof typeof Provider>(
             return await getBoltFredrikstadToken()
         case Provider.boltlillestrom:
             return await getBoltLillestromToken()
+        case Provider.boltbergen:
+            return await getBoltBergenToken()
         default:
             throw new Error('Unknown provider')
     }
@@ -378,6 +389,7 @@ async function getFeed<T extends keyof typeof Provider>(
         case Provider.boltoslo:
         case Provider.boltfredrikstad:
         case Provider.boltlillestrom:
+        case Provider.boltbergen:
             return await getBoltFeed(feedUrl, bearerToken)
         default:
             throw new Error('Unknown provider')
@@ -456,6 +468,13 @@ async function getBoltLillestromToken(): Promise<string> {
     return await getBoltToken(
         functions.config().bolt.api.lillestrom.user,
         functions.config().bolt.api.lillestrom.pass,
+    )
+}
+
+async function getBoltBergenToken(): Promise<string> {
+    return await getBoltToken(
+        functions.config().bolt.api.bergen.user,
+        functions.config().bolt.api.bergen.pass,
     )
 }
 

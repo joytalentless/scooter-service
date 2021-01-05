@@ -29,6 +29,7 @@ let voiSessionKey = ''
 let boltOsloToken = ''
 let boltLillestromToken = ''
 let boltFredrikstadToken = ''
+let boltBergenToken = ''
 
 const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
@@ -322,6 +323,13 @@ async function boltRequests() {
             ),
             BoltOperatorCity.FREDRIKSTAD,
         ),
+        ...mapBolt(
+            await boltRequest(
+                functions.config().bolt.url.bergen,
+                boltBergenToken,
+            ),
+            BoltOperatorCity.BERGEN,
+        ),
     ]
 }
 
@@ -348,6 +356,10 @@ async function refreshBoltTokens() {
         boltFredrikstadToken = await refreshBoltToken(
             functions.config().bolt.api.fredrikstad.user,
             functions.config().bolt.api.fredrikstad.pass,
+        )
+        boltBergenToken = await refreshBoltToken(
+            functions.config().bolt.api.bergen.user,
+            functions.config().bolt.api.bergen.pass,
         )
     } catch (err) {
         logError(Operator.BOLT, err, 'Failed to refresh session key')

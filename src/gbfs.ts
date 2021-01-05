@@ -65,17 +65,20 @@ app.get(
         const feed = <keyof typeof Feed>feedString
 
         if (feed == Feed.gbfs) {
-          res.status(200).send(getDiscoveryFeed(provider))
-        } else if (feed === Feed.vehicle_types && provider !== Provider.limeoslo) {
-          res.status(200).send(getVehicleTypesFeed(provider))
+            res.status(200).send(getDiscoveryFeed(provider))
+        } else if (
+            feed === Feed.vehicle_types &&
+            provider !== Provider.limeoslo
+        ) {
+            res.status(200).send(getVehicleTypesFeed(provider))
         } else if (feed === Feed.system_pricing_plans) {
-          res.status(200).send(getSystemPricingPlansFeed(provider))
+            res.status(200).send(getSystemPricingPlansFeed(provider))
         } else {
-          const feedUrl = getFeedUrl(provider, feed)
-          const bearerToken = await getBearerToken(provider)
-          const feedResponse = await getFeed(provider, feedUrl, bearerToken)
-          const mappedFeed = mapFeed(provider, feed, feedResponse)
-          res.status(200).send(mappedFeed)
+            const feedUrl = getFeedUrl(provider, feed)
+            const bearerToken = await getBearerToken(provider)
+            const feedResponse = await getFeed(provider, feedUrl, bearerToken)
+            const mappedFeed = mapFeed(provider, feed, feedResponse)
+            res.status(200).send(mappedFeed)
         }
     },
 )
@@ -99,15 +102,13 @@ function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
     }
 }
 
-function getDiscoveryFeed<T extends keyof typeof Provider>(
-    provider: T
-): GBFS {
+function getDiscoveryFeed<T extends keyof typeof Provider>(provider: T): GBFS {
     return {
         last_updated: lastUpdated,
         ttl: 300,
         version: '2.1',
         data: {
-            "en": {
+            en: {
                 feeds: [
                     {
                         name: 'system_information',

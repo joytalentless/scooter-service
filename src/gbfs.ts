@@ -64,16 +64,18 @@ app.get(
         const provider = <keyof typeof Provider>providerString
         const feed = <keyof typeof Feed>feedString
 
-        if (feed === Feed.vehicle_types && provider !== Provider.limeoslo) {
-            res.status(200).send(getVehicleTypesFeed(provider))
+        if (feed == Feed.gbfs) {
+          res.status(200).send(getDiscoveryFeed(provider))
+        } else if (feed === Feed.vehicle_types && provider !== Provider.limeoslo) {
+          res.status(200).send(getVehicleTypesFeed(provider))
         } else if (feed === Feed.system_pricing_plans) {
-            res.status(200).send(getSystemPricingPlansFeed(provider))
+          res.status(200).send(getSystemPricingPlansFeed(provider))
         } else {
-            const feedUrl = getFeedUrl(provider, feed)
-            const bearerToken = await getBearerToken(provider)
-            const feedResponse = await getFeed(provider, feedUrl, bearerToken)
-            const mappedFeed = mapFeed(provider, feed, feedResponse)
-            res.status(200).send(mappedFeed)
+          const feedUrl = getFeedUrl(provider, feed)
+          const bearerToken = await getBearerToken(provider)
+          const feedResponse = await getFeed(provider, feedUrl, bearerToken)
+          const mappedFeed = mapFeed(provider, feed, feedResponse)
+          res.status(200).send(mappedFeed)
         }
     },
 )
@@ -85,7 +87,7 @@ function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
 ): GBFSBase {
     switch (feed) {
         case Feed.gbfs:
-            return mapDiscoveryFeed(provider, feedResponse)
+            return getDiscoveryFeed(provider)
         case Feed.system_information:
             return mapSystemInformationFeed(provider, feedResponse)
         case Feed.vehicle_types:
@@ -97,19 +99,15 @@ function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
     }
 }
 
-function mapDiscoveryFeed<T extends keyof typeof Provider>(
-    provider: T,
-    feedResponse: string,
+function getDiscoveryFeed<T extends keyof typeof Provider>(
+    provider: T
 ): GBFS {
-    const gbfs: GBFS = JSON.parse(feedResponse)
-    const lang = Object.keys(gbfs.data)[0]
-
     return {
-        last_updated: gbfs.last_updated,
+        last_updated: lastUpdated,
         ttl: 300,
         version: '2.1',
         data: {
-            [lang]: {
+            "en": {
                 feeds: [
                     {
                         name: 'system_information',

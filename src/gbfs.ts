@@ -416,4 +416,4 @@ async function getBoltToken(user: string, pass: string): Promise<string> {
   }
 }
 
-export const gbfs = functions.region('europe-west1').https.onRequest(app)
+export const v2_1 = functions.region('europe-west1').https.onRequest(app)

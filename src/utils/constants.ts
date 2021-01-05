@@ -53,7 +53,7 @@ export const boltFredrikstadScooterPrise: ScooterPrice = {
 
 export const limeScooterPrice: ScooterPrice = {
     startPrice: 10,
-    pricePerMinute: 3.0
+    pricePerMinute: 3.0,
 }
 
 export const scooterPrices: priceTexts = {
@@ -81,5 +81,5 @@ export const scooterPrices: priceTexts = {
     lime: formatPriceToText(
         limeScooterPrice.startPrice,
         limeScooterPrice.pricePerMinute,
-    )
+    ),
 }

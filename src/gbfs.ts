@@ -113,19 +113,19 @@ function mapDiscoveryFeed<T extends keyof typeof Provider>(
                 feeds: [
                     {
                         name: 'system_information',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-gbfs/${provider}/system_information`,
+                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/system_information`,
                     },
                     {
                         name: 'vehicle_types',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-gbfs/${provider}/vehicle_types`,
+                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/vehicle_types`,
                     },
                     {
                         name: 'free_bike_status',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-gbfs/${provider}/free_bike_status`,
+                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/free_bike_status`,
                     },
                     {
                         name: 'system_pricing_plans',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-gbfs/${provider}/system_pricing_plans`,
+                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/system_pricing_plans`,
                     },
                 ],
             },

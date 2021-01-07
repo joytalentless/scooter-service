@@ -58,7 +58,7 @@ export const boltBergenScooterPrice: ScooterPrice = {
 
 export const limeScooterPrice: ScooterPrice = {
     startPrice: 10,
-    pricePerMinute: 3.0,
+    pricePerMinute: 2.5,
 }
 
 export const scooterPrices: priceTexts = {

@@ -57,6 +57,7 @@ const lastUpdated = new Date().getTime()
 app.get(
     '/:provider/:feed',
     async (req, res): Promise<void> => {
+        const hostname = req.hostname
         const { provider: providerString, feed: feedString } = req.params
 
         if (!isProviderName(providerString) || !isFeedName(feedString)) {
@@ -67,7 +68,7 @@ app.get(
         const feed = <keyof typeof Feed>feedString
 
         if (feed == Feed.gbfs) {
-            res.status(200).send(getDiscoveryFeed(provider))
+            res.status(200).send(getDiscoveryFeed(hostname, provider))
         } else if (
             feed === Feed.vehicle_types &&
             provider !== Provider.limeoslo
@@ -79,20 +80,21 @@ app.get(
             const feedUrl = getFeedUrl(provider, feed)
             const bearerToken = await getBearerToken(provider)
             const feedResponse = await getFeed(provider, feedUrl, bearerToken)
-            const mappedFeed = mapFeed(provider, feed, feedResponse)
+            const mappedFeed = mapFeed(hostname, provider, feed, feedResponse)
             res.status(200).send(mappedFeed)
         }
     },
 )
 
 function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
+    hostname: string,
     provider: T,
     feed: S,
     feedResponse: string,
 ): GBFSBase {
     switch (feed) {
         case Feed.gbfs:
-            return getDiscoveryFeed(provider)
+            return getDiscoveryFeed(hostname, provider)
         case Feed.system_information:
             return mapSystemInformationFeed(provider, feedResponse)
         case Feed.vehicle_types:
@@ -104,7 +106,19 @@ function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
     }
 }
 
-function getDiscoveryFeed<T extends keyof typeof Provider>(provider: T): GBFS {
+function getDiscoveryFeed<T extends keyof typeof Provider>(
+    hostname: string,
+    provider: T,
+): GBFS {
+    let baseUrl
+    if (hostname === 'localhost') {
+        baseUrl = 'http://localhost:5001'
+    } else if (hostname.includes('staging')) {
+        baseUrl = 'https://api.staging.entur.io'
+    } else {
+        baseUrl = 'https://api.entur.io'
+    }
+
     return {
         last_updated: lastUpdated,
         ttl: 300,
@@ -114,19 +128,19 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(provider: T): GBFS {
                 feeds: [
                     {
                         name: 'system_information',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/system_information`,
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/system_information`,
                     },
                     {
                         name: 'vehicle_types',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/vehicle_types`,
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/vehicle_types`,
                     },
                     {
                         name: 'free_bike_status',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/free_bike_status`,
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/free_bike_status`,
                     },
                     {
                         name: 'system_pricing_plans',
-                        url: `https://api.staging.entur.io/mobility/v1/gbfs-v2_1/${provider}/system_pricing_plans`,
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/system_pricing_plans`,
                     },
                 ],
             },

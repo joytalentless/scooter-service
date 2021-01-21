@@ -243,9 +243,7 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                     bike.vehicle_type_id || 'Scooter'
                 }`,
                 current_range_meters: bike.current_range_meters || 0,
-                pricing_plan_id: bike.pricing_plan_id
-                    ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
-                    : pricingPlanId,
+                pricing_plan_id: pricingPlanId,
                 last_reported: bike.last_reported || null,
                 station_id: null,
                 rental_uris: bike.rental_uris ? bike.rental_uris : null,

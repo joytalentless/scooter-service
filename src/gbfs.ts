@@ -226,6 +226,7 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
 ): FreeBikeStatus {
     const freeBikeStatus: FreeBikeStatus = JSON.parse(feedResponse)
     const codespace = getCodespace(provider)
+    const pricingPlanId = getSystemPricingPlanId(provider, codespace)
 
     return {
         last_updated: freeBikeStatus.last_updated,
@@ -242,9 +243,9 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                     bike.vehicle_type_id || 'Scooter'
                 }`,
                 current_range_meters: bike.current_range_meters || 0,
-                pricing_plan_id: `${codespace}:PricingPlan:${
-                    bike.pricing_plan_id || 'Basic'
-                }`,
+                pricing_plan_id: bike.pricing_plan_id
+                    ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
+                    : pricingPlanId,
                 last_reported: bike.last_reported || null,
                 station_id: null,
                 rental_uris: bike.rental_uris ? bike.rental_uris : null,
@@ -258,6 +259,7 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
 ): SystemPricingPlans {
     const codespace = getCodespace(provider)
     const price: ScooterPrice = getSystemPricing(provider)
+    const planId = getSystemPricingPlanId(provider, codespace)
 
     return {
         last_updated: lastUpdated,
@@ -266,7 +268,7 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
         data: {
             plans: [
                 {
-                    plan_id: `${codespace}:PricingPlan:Basic`,
+                    plan_id: planId,
                     name: 'Basic',
                     currency: 'NOK',
                     price: price.startPrice,
@@ -319,6 +321,19 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
         default:
             throw new Error('Unknown provider')
     }
+}
+
+function getSystemPricingPlanId<T extends keyof typeof Provider>(
+    provider: T,
+    codespace: string,
+): string {
+    let id = `${codespace}:PricingPlan:Basic`
+
+    if (codespace === 'YBO') {
+        id = `${codespace}:PricingPlan:${provider}`
+    }
+
+    return id
 }
 
 function isProviderName(name: string): name is Provider {

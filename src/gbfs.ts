@@ -62,6 +62,7 @@ app.get(
 
         if (!isProviderName(providerString) || !isFeedName(feedString)) {
             res.sendStatus(404)
+            return;
         }
 
         const provider = <keyof typeof Provider>providerString
@@ -154,7 +155,7 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
 ): SystemInformation {
     const {
         last_updated,
-        data: { system_id, language, name, url, timezone },
+        data: { system_id, language, name, url, timezone, rental_apps },
     }: SystemInformation = JSON.parse(feedResponse)
 
     const codespace = getCodespace(provider)
@@ -169,6 +170,7 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
             name,
             url,
             timezone,
+            rental_apps: rental_apps ? rental_apps : null,
         },
     }
 }

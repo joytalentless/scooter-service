@@ -54,5 +54,6 @@ export function mapBolt(
         city: operatorCity.toLowerCase(),
         lat: Number(b.lat),
         lon: Number(b.lon),
+        rental_uris: b.rental_uris,
     }))
 }

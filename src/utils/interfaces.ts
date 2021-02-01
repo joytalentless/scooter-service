@@ -62,6 +62,10 @@ export interface Bolt {
     lon: number
     is_reserved: boolean
     is_disabled: boolean
+    rental_uris?: {
+        android: URL
+        ios: URL
+    }
 }
 
 export interface ScooterQuery {

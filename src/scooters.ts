@@ -31,6 +31,13 @@ let boltLillestromToken = ''
 let boltFredrikstadToken = ''
 let boltBergenToken = ''
 
+const bboxNorway = {
+    ix: 4.99207807783,
+    ax: 58.0788841824,
+    iy: 31.29341841,
+    ay: 80.6571442736
+};
+
 const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
         console.log(`ET-Client-Name: ${client}`)
@@ -101,7 +108,13 @@ export const scooters = functions.region('europe-west1').https.onRequest(
                 range,
                 operatorsWhitelist,
             )
-            const closestVehicles: Vehicle[] = vehicles
+
+            // Filter out vehicles outside rudimentary
+            // bounding box for Norway
+            const vehiclesInNorway = vehicles
+                .filter(p => bboxNorway.ix <= p.lon && p.lon <= bboxNorway.ax && bboxNorway.iy <= p.lat && p.lat <= bboxNorway.ay)
+
+            const closestVehicles: Vehicle[] = vehiclesInNorway
                 .sort(
                     (v1, v2) =>
                         distance(lat, lon, v1.lat, v1.lon) -

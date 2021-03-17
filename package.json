@@ -3,7 +3,7 @@
     "scripts": {
         "lint": "eslint src/ --ext .ts",
         "build": "tsc",
-        "start": "nodemon --watch src -e ts --exec 'npm run build && firebase emulators:start --only functions'",
+        "start": "nodemon --watch src -e ts --exec 'npm run build && firebase emulators:start --only functions,hosting'",
         "get-config": "firebase functions:config:get > .runtimeconfig.json",
         "deploy-apigee": "./scripts/deploy-apigee.sh",
         "deploy:staging": "firebase deploy --only functions -P entur-mobility-staging",

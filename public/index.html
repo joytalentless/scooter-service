@@ -82,7 +82,7 @@
     let heatmap;
     function updateHeatmap() {
         document.getElementById("scooterCount").textContent = 'Loading...';
-        fetch(`https://api.entur.io/mobility/v1/scooters?lat=${center.lat()}&lon=${center.lng()}&range=${range}&max=50000`, {
+        fetch(`/api/scooters?lat=${center.lat()}&lon=${center.lng()}&range=${range}&max=50000`, {
             method: 'GET',
             headers: {
                 'ET-Client-Name': 'entur - scooter-dashboard'

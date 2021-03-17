@@ -32,10 +32,14 @@ let boltFredrikstadToken = ''
 let boltBergenToken = ''
 
 const bboxNorway = {
-    ix: 4.99207807783,
-    ax: 58.0788841824,
-    iy: 31.29341841,
-    ay: 80.6571442736,
+    topLeft: {
+        lon: 4.99207807783,
+        lat: 80.6571442736,
+    },
+    bottomRight: {
+        lon: 31.29341841,
+        lat: 58.0788841824,
+    },
 }
 
 const logClientName = (client: string): void => {
@@ -113,10 +117,10 @@ export const scooters = functions.region('europe-west1').https.onRequest(
             // bounding box for Norway
             const vehiclesInNorway = vehicles.filter(
                 (p) =>
-                    bboxNorway.ix <= p.lon &&
-                    p.lon <= bboxNorway.ax &&
-                    bboxNorway.iy <= p.lat &&
-                    p.lat <= bboxNorway.ay,
+                    bboxNorway.topLeft.lon <= p.lon &&
+                    p.lon <= bboxNorway.bottomRight.lon &&
+                    bboxNorway.topLeft.lat >= p.lat &&
+                    p.lat >= bboxNorway.bottomRight.lat,
             )
 
             const closestVehicles: Vehicle[] = vehiclesInNorway

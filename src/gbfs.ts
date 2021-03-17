@@ -62,7 +62,7 @@ app.get(
 
         if (!isProviderName(providerString) || !isFeedName(feedString)) {
             res.sendStatus(404)
-            return;
+            return
         }
 
         const provider = <keyof typeof Provider>providerString

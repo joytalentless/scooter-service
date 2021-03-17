@@ -35,8 +35,8 @@ const bboxNorway = {
     ix: 4.99207807783,
     ax: 58.0788841824,
     iy: 31.29341841,
-    ay: 80.6571442736
-};
+    ay: 80.6571442736,
+}
 
 const logClientName = (client: string): void => {
     if (!client.startsWith(CLIENT_ENTUR)) {
@@ -111,8 +111,13 @@ export const scooters = functions.region('europe-west1').https.onRequest(
 
             // Filter out vehicles outside rudimentary
             // bounding box for Norway
-            const vehiclesInNorway = vehicles
-                .filter(p => bboxNorway.ix <= p.lon && p.lon <= bboxNorway.ax && bboxNorway.iy <= p.lat && p.lat <= bboxNorway.ay)
+            const vehiclesInNorway = vehicles.filter(
+                (p) =>
+                    bboxNorway.ix <= p.lon &&
+                    p.lon <= bboxNorway.ax &&
+                    bboxNorway.iy <= p.lat &&
+                    p.lat <= bboxNorway.ay,
+            )
 
             const closestVehicles: Vehicle[] = vehiclesInNorway
                 .sort(

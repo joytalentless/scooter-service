@@ -230,12 +230,36 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
     const codespace = getCodespace(provider)
     const pricingPlanId = getSystemPricingPlanId(provider, codespace)
 
+    let bikes = freeBikeStatus.data.bikes
+
+    // Note: VOI seems to have a bug in their system that sends duplicates of vehicles
+    // when they have just been reserved. The following code section makes sure that
+    // the vehicle that is actually marked as reserved is the one that is exposed by
+    // the proxied feed. VOI has been notified of the issue.
+    if (provider === Provider.voioslo) {
+        bikes = Object.values(
+            bikes.reduce((acc: Record<string, Bike>, current: Bike) => {
+                if (acc[current.bike_id]) {
+                    console.log(
+                        'Found duplicate voi scooter ' + current.bike_id,
+                    )
+                    if (current.is_reserved) {
+                        acc[current.bike_id] = current
+                    }
+                } else {
+                    acc[current.bike_id] = current
+                }
+                return acc
+            }, {}),
+        )
+    }
+
     return {
         last_updated: freeBikeStatus.last_updated,
         ttl: 300,
         version: '2.1',
         data: {
-            bikes: freeBikeStatus.data.bikes.map((bike: any) => ({
+            bikes: bikes.map((bike: any) => ({
                 bike_id: `${codespace}:Scooter:${bike.bike_id}`,
                 lat: bike.lat,
                 lon: bike.lon,

@@ -123,7 +123,7 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
     return {
         last_updated: lastUpdated,
         ttl: 300,
-        version: '2.1',
+        version: '2.2',
         data: {
             en: {
                 feeds: [
@@ -163,7 +163,7 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
     return {
         last_updated,
         ttl: 300,
-        version: '2.1',
+        version: '2.2',
         data: {
             system_id: `${codespace}:System:${system_id}Oslo`,
             language,
@@ -183,7 +183,7 @@ function getVehicleTypesFeed<T extends keyof typeof Provider>(
     return {
         last_updated: lastUpdated,
         ttl: 300,
-        version: '2.1',
+        version: '2.2',
         data: {
             vehicle_types: [
                 {
@@ -206,7 +206,7 @@ function mapVehicleTypesFeed<T extends keyof typeof Provider>(
     return {
         last_updated: vehicleTypes.last_updated,
         ttl: 300,
-        version: '2.1',
+        version: '2.2',
         data: {
             vehicle_types: vehicleTypes.data.vehicle_types.map(
                 (vehicleType) => {
@@ -257,7 +257,7 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
     return {
         last_updated: freeBikeStatus.last_updated,
         ttl: 300,
-        version: '2.1',
+        version: '2.2',
         data: {
             bikes: bikes.map((bike: any) => ({
                 bike_id: `${codespace}:Scooter:${bike.bike_id}`,
@@ -288,7 +288,7 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
     return {
         last_updated: lastUpdated,
         ttl: 300,
-        version: '2.1',
+        version: '2.2',
         data: {
             plans: [
                 {
@@ -551,3 +551,4 @@ async function getBoltToken(user: string, pass: string): Promise<string> {
 }
 
 export const v2_1 = functions.region('europe-west1').https.onRequest(app)
+export const v2_2 = functions.region('europe-west1').https.onRequest(app)

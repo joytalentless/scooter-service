@@ -55,7 +55,7 @@ const app = express()
 const lastUpdated = new Date().getTime()
 
 app.get(
-    '/:provider/:feed',
+    '/:provider/:original?/:feed.:ext?',
     async (req, res): Promise<void> => {
         const hostname = req.hostname
         const { provider: providerString, feed: feedString } = req.params
@@ -67,6 +67,23 @@ app.get(
 
         const provider = <keyof typeof Provider>providerString
         const feed = <keyof typeof Feed>feedString
+
+        if (req.params.original) {
+            const feedUrl = getFeedUrl(provider, feed)
+            const bearerToken = await getBearerToken(provider)
+            try {
+                const feedResponse = await getFeed(
+                    provider,
+                    feedUrl,
+                    bearerToken,
+                )
+                res.status(200).send(feedResponse)
+            } catch (e) {
+                res.status(404).send()
+            }
+
+            return
+        }
 
         if (feed == Feed.gbfs) {
             res.status(200).send(getDiscoveryFeed(hostname, provider))

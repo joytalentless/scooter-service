@@ -253,7 +253,7 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
     // when they have just been reserved. The following code section makes sure that
     // the vehicle that is actually marked as reserved is the one that is exposed by
     // the proxied feed. VOI has been notified of the issue.
-    if (provider === Provider.voioslo) {
+    if (isVoi(provider)) {
         bikes = Object.values(
             bikes.reduce((acc: Record<string, Bike>, current: Bike) => {
                 if (acc[current.bike_id]) {
@@ -293,6 +293,10 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
             })),
         },
     }
+}
+
+function isVoi<T extends keyof typeof Provider>(provider: T): boolean {
+    return provider === Provider.voioslo || provider === Provider.voitrondheim
 }
 
 function getSystemPricingPlansFeed<T extends keyof typeof Provider>(

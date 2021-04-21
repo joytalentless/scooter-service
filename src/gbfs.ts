@@ -162,6 +162,26 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
                     },
                 ],
             },
+            nb: {
+                feeds: [
+                    {
+                        name: 'system_information',
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_information`,
+                    },
+                    {
+                        name: 'vehicle_types',
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/vehicle_types`,
+                    },
+                    {
+                        name: 'free_bike_status',
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/free_bike_status`,
+                    },
+                    {
+                        name: 'system_pricing_plans',
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_pricing_plans`,
+                    },
+                ],
+            }
         },
     }
 }
@@ -183,7 +203,7 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
         version: '2.2',
         data: {
             system_id: `${codespace}:System:${system_id}Oslo`,
-            language,
+            language: "no",
             name,
             url,
             timezone,
@@ -318,7 +338,7 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
                     currency: 'NOK',
                     price: price.startPrice,
                     is_taxable: false,
-                    description: `Start NOK ${price.startPrice}, Per minute ${price.pricePerMinute} NOK`,
+                    description: `Start ${price.startPrice} kroner, deretter ${price.pricePerMinute} kroner per minutt`,
                     per_min_pricing: [
                         {
                             start: 0,

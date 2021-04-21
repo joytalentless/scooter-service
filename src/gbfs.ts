@@ -181,7 +181,7 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
                         url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_pricing_plans`,
                     },
                 ],
-            }
+            },
         },
     }
 }
@@ -192,7 +192,7 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
 ): SystemInformation {
     const {
         last_updated,
-        data: { system_id, language, name, url, timezone, rental_apps },
+        data: { system_id, name, url, timezone, rental_apps },
     }: SystemInformation = JSON.parse(feedResponse)
 
     const codespace = getCodespace(provider)
@@ -203,7 +203,7 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
         version: '2.2',
         data: {
             system_id: `${codespace}:System:${system_id}Oslo`,
-            language: "no",
+            language: 'no',
             name,
             url,
             timezone,

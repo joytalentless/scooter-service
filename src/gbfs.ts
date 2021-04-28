@@ -192,18 +192,17 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
 ): SystemInformation {
     const {
         last_updated,
-        data: { system_id, name, url, timezone, rental_apps },
+        data: { name, url, timezone, rental_apps },
     }: SystemInformation = JSON.parse(feedResponse)
-
-    const codespace = getCodespace(provider)
+    const systemId = getSystemId(provider)
 
     return {
         last_updated,
         ttl: 300,
         version: '2.2',
         data: {
-            system_id: `${codespace}:System:${system_id}Oslo`,
-            language: 'no',
+            system_id: systemId,
+            language: 'nb',
             name,
             url,
             timezone,
@@ -383,6 +382,27 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
         case Provider.boltlillestrom:
         case Provider.boltbergen:
             return 'YBO'
+        default:
+            throw new Error('Unknown provider')
+    }
+}
+
+function getSystemId<T extends keyof typeof Provider>(provider: T): string {
+    switch (provider) {
+        case Provider.voioslo:
+            return 'YVO:System:voioslo'
+        case Provider.voitrondheim:
+            return 'YVO:System:voitrondheim'
+        case Provider.limeoslo:
+            return 'YLI:System:limeoslo'
+        case Provider.boltoslo:
+            return 'YBO:System:boltoslo'
+        case Provider.boltfredrikstad:
+            return 'YBO:System:boltfredrikstad'
+        case Provider.boltlillestrom:
+            return 'YBO:System:boltlillestrom'
+        case Provider.boltbergen:
+            return 'YBO:System.boltbergen'
         default:
             throw new Error('Unknown provider')
     }

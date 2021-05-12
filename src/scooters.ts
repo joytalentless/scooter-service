@@ -136,7 +136,7 @@ export const scooters = functions.region('europe-west1').https.onRequest(
             )
             res.status(200).send(closestVehicles)
         } catch (e) {
-            console.error(e)
+            console.error('Unhandled error', e)
             res.status(500).send(e)
         }
     },
@@ -211,7 +211,7 @@ async function getVoiScooters() {
                 await refreshVoiSessionKey()
                 return await voiRequest()
             } catch (e) {
-                console.error(e)
+                logError(Operator.VOI, err)
                 return []
             }
         } else {
@@ -222,19 +222,29 @@ async function getVoiScooters() {
 }
 
 async function voiRequest() {
-    const voiOsloResponse: request.Response = await request
-        .get(`${functions.config().voi.url.oslo}`)
-        .set('Authorization', `Bearer ${voiSessionKey}`)
-        .set('X-Voigbfs-Ext', 'Battery')
-        .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
-    const voiOslo: Voi[] = JSON.parse(voiOsloResponse.text).data.bikes
+    let voiOslo: Voi[] = []
+    let voiTrondheim: Voi[] = []
+    try {
+        const voiOsloResponse: request.Response = await request
+            .get(`${functions.config().voi.url.oslo}`)
+            .set('Authorization', `Bearer ${voiSessionKey}`)
+            .set('X-Voigbfs-Ext', 'Battery')
+            .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
+        voiOslo = JSON.parse(voiOsloResponse.text).data.bikes
+    } catch (err) {
+        logError(Operator.VOI, err, 'Failed to get voioslo scooters')
+    }
 
-    const voiTrondheimResponse: request.Response = await request
-        .get(`${functions.config().voi.url.trondheim}`)
-        .set('Authorization', `Bearer ${voiSessionKey}`)
-        .set('X-Voigbfs-Ext', 'Battery')
-        .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
-    const voiTrondheim: Voi[] = JSON.parse(voiTrondheimResponse.text).data.bikes
+    try {
+        const voiTrondheimResponse: request.Response = await request
+            .get(`${functions.config().voi.url.trondheim}`)
+            .set('Authorization', `Bearer ${voiSessionKey}`)
+            .set('X-Voigbfs-Ext', 'Battery')
+            .set('Accept', 'application/vnd.mds.provider+json;version=0.3')
+        voiTrondheim = JSON.parse(voiTrondheimResponse.text).data.bikes
+    } catch (err) {
+        logError(Operator.VOI, err, 'Failed to get voitrondheim scooters')
+    }
 
     return mapVoi(
         voiOslo
@@ -315,7 +325,7 @@ async function getBoltScooters() {
                 await refreshBoltTokens()
                 return await boltRequests()
             } catch (e) {
-                console.error(e)
+                logError(Operator.BOLT, err)
                 return []
             }
         } else {
@@ -356,12 +366,17 @@ async function boltRequests() {
 }
 
 async function boltRequest(url: string, token: string): Promise<Bolt[]> {
-    const boltResponse: request.Response = await request
-        .get(url)
-        .set('Authorization', `Bearer ${token}`)
-        .set('Accept', 'application/json')
-    const bolt: Bolt[] = JSON.parse(boltResponse.text).data.bikes
-    return bolt.filter((v) => !v.is_disabled && !v.is_reserved)
+    try {
+        const boltResponse: request.Response = await request
+            .get(url)
+            .set('Authorization', `Bearer ${token}`)
+            .set('Accept', 'application/json')
+        const bolt: Bolt[] = JSON.parse(boltResponse.text).data.bikes
+        return bolt.filter((v) => !v.is_disabled && !v.is_reserved)
+    } catch (err) {
+        logError(Operator.BOLT, err)
+        return []
+    }
 }
 
 async function refreshBoltTokens() {

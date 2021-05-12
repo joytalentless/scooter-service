@@ -23,6 +23,7 @@ import {
     limeScooterPrice,
 } from './utils/constants'
 import { ScooterPrice } from './utils/interfaces'
+import { warn } from 'firebase-functions/lib/logger'
 
 enum Provider {
     voioslo = 'voioslo',
@@ -95,11 +96,29 @@ app.get(
         } else if (feed === Feed.system_pricing_plans) {
             res.status(200).send(getSystemPricingPlansFeed(provider))
         } else {
-            const feedUrl = getFeedUrl(provider, feed)
-            const bearerToken = await getBearerToken(provider)
-            const feedResponse = await getFeed(provider, feedUrl, bearerToken)
-            const mappedFeed = mapFeed(hostname, provider, feed, feedResponse)
-            res.status(200).send(mappedFeed)
+            try {
+                const feedUrl = getFeedUrl(provider, feed)
+                const bearerToken = await getBearerToken(provider)
+                const feedResponse = await getFeed(
+                    provider,
+                    feedUrl,
+                    bearerToken,
+                )
+                const mappedFeed = mapFeed(
+                    hostname,
+                    provider,
+                    feed,
+                    feedResponse,
+                )
+                res.status(200).send(mappedFeed)
+            } catch (e) {
+                warn('Error caught while processing feed', {
+                    provider,
+                    feed,
+                    error: e,
+                })
+                res.status(500).send('Server error')
+            }
         }
     },
 )

@@ -8,4 +8,5 @@ interface Toggles {
     bolt?: 'off'
 }
 
-export const toggles = (): Toggles => functions.config().toggles || {}
+export const toggles = (): Toggles =>
+    (functions.config().toggles as Toggles) || {}

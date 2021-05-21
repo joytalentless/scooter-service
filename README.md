@@ -18,7 +18,7 @@ The current project should be `entur-mobility-staging`. If it is not, then switc
 
 First of all, make sure you have version 10 or higher of Node.js installed.
 
-* Install dependencies: `npm install`
+* Install dependencies: `npm install` (npm >= v7.0.0 is required)
 * Download config variables: `npm run get-config`
 * Build project and start emulator: `npm start`
 

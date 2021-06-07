@@ -483,7 +483,7 @@ function getFeedUrl<
         case Provider.limeoslo:
             return functions
                 .config()
-                .lime.url.oslo.replace('free_bike_status', feed)
+                .lime.url.oslo_v2.replace('free_bike_status', feed)
         case Provider.boltoslo:
             return functions
                 .config()

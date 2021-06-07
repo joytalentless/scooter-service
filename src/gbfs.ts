@@ -10,6 +10,7 @@
  *
  */
 import * as functions from 'firebase-functions'
+import { warn } from 'firebase-functions/lib/logger'
 import * as request from 'superagent'
 import * as express from 'express'
 import { logError } from './utils/logging'
@@ -23,7 +24,7 @@ import {
     limeScooterPrice,
 } from './utils/constants'
 import { ScooterPrice } from './utils/interfaces'
-import { warn } from 'firebase-functions/lib/logger'
+import { formatDecimals } from './utils/formatters'
 
 enum Provider {
     voioslo = 'voioslo',
@@ -352,8 +353,15 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
     provider: T,
 ): SystemPricingPlans {
     const codespace = getCodespace(provider)
-    const price: ScooterPrice = getSystemPricing(provider)
+    const { startPrice, pricePerMinute }: ScooterPrice = getSystemPricing(
+        provider,
+    )
     const planId = getSystemPricingPlanId(provider, codespace)
+
+    const description = `${formatDecimals(
+        startPrice,
+        'no',
+    )} kr + ${formatDecimals(pricePerMinute, 'no')} kr / min`
 
     return {
         last_updated: lastUpdated,
@@ -365,13 +373,13 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
                     plan_id: planId,
                     name: 'Basic',
                     currency: 'NOK',
-                    price: price.startPrice,
+                    price: startPrice,
                     is_taxable: false,
-                    description: `Start ${price.startPrice} kroner, deretter ${price.pricePerMinute} kroner per minutt`,
+                    description,
                     per_min_pricing: [
                         {
                             start: 0,
-                            rate: price.pricePerMinute,
+                            rate: pricePerMinute,
                             interval: 1,
                         },
                     ],

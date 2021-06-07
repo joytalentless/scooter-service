@@ -1,4 +1,4 @@
-const formatDecimals = (price: number, locale: 'en' | 'no') => {
+export const formatDecimals = (price: number, locale: 'en' | 'no'): string => {
     const [integer, fraction] = price.toString().split('.')
     const withFraction = fraction && !/^0*$/.test(fraction)
     return withFraction

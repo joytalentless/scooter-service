@@ -138,6 +138,8 @@ function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
             return mapVehicleTypesFeed(provider, feedResponse)
         case Feed.free_bike_status:
             return mapFreeBikeStatusFeed(provider, feedResponse)
+        case Feed.geofencing_zones:
+            return mapGeofencingZones(provider, feedResponse)
         default:
             throw new Error('Unknown feed')
     }
@@ -161,26 +163,6 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
         ttl: 300,
         version: '2.2',
         data: {
-            en: {
-                feeds: [
-                    {
-                        name: 'system_information',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/system_information`,
-                    },
-                    {
-                        name: 'vehicle_types',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/vehicle_types`,
-                    },
-                    {
-                        name: 'free_bike_status',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/free_bike_status`,
-                    },
-                    {
-                        name: 'system_pricing_plans',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_1/${provider}/system_pricing_plans`,
-                    },
-                ],
-            },
             nb: {
                 feeds: [
                     {
@@ -198,6 +180,10 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
                     {
                         name: 'system_pricing_plans',
                         url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_pricing_plans`,
+                    },
+                    {
+                        name: 'geofencing_zones',
+                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/geofencing_zones`,
                     },
                 ],
             },
@@ -329,6 +315,31 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                 station_id: null,
                 rental_uris: bike.rental_uris ? bike.rental_uris : null,
             })),
+        },
+    }
+}
+
+function mapGeofencingZones<T extends keyof typeof Provider>(
+    provider: T,
+    feedResponse: string,
+): GeofencingZones {
+    const geofencingZones: GeofencingZones = JSON.parse(feedResponse)
+    return {
+        last_updated: geofencingZones.last_updated,
+        ttl: 300,
+        version: '2.2',
+        data: {
+            geofencing_zones: {
+                type: 'FeatureCollection',
+                features: geofencingZones.data.geofencing_zones.features.map(
+                    (feature: Feature) => ({
+                        ...feature,
+                        properties: {
+                            rules: feature.properties.rules,
+                        },
+                    }),
+                ),
+            },
         },
     }
 }

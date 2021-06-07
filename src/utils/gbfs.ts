@@ -354,10 +354,10 @@ interface Rule {
 }
 
 interface Properties {
-    end: number | null
-    name: string | null
-    rules: Rule[] | null
-    start: number | null
+    end?: number | null
+    name?: string | null
+    rules?: Rule[] | null
+    start?: number | null
 }
 
 interface Feature {

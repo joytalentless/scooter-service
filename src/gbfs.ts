@@ -36,7 +36,7 @@ enum Provider {
     boltbergen = 'boltbergen',
 }
 
-enum Feed {
+enum FeedName {
     gbfs = 'gbfs',
     gbfs_versions = 'gbfs_versions',
     system_information = 'system_information',
@@ -68,7 +68,7 @@ app.get(
         }
 
         const provider = <keyof typeof Provider>providerString
-        const feed = <keyof typeof Feed>feedString
+        const feed = <keyof typeof FeedName>feedString
 
         if (req.params.original) {
             const feedUrl = getFeedUrl(provider, feed)
@@ -87,14 +87,14 @@ app.get(
             return
         }
 
-        if (feed == Feed.gbfs) {
+        if (feed == FeedName.gbfs) {
             res.status(200).send(getDiscoveryFeed(hostname, provider))
         } else if (
-            feed === Feed.vehicle_types &&
+            feed === FeedName.vehicle_types &&
             provider !== Provider.limeoslo
         ) {
             res.status(200).send(getVehicleTypesFeed(provider))
-        } else if (feed === Feed.system_pricing_plans) {
+        } else if (feed === FeedName.system_pricing_plans) {
             res.status(200).send(getSystemPricingPlansFeed(provider))
         } else {
             try {
@@ -124,22 +124,20 @@ app.get(
     },
 )
 
-function mapFeed<T extends keyof typeof Provider, S extends keyof typeof Feed>(
-    hostname: string,
-    provider: T,
-    feed: S,
-    feedResponse: string,
-): GBFSBase {
+function mapFeed<
+    T extends keyof typeof Provider,
+    S extends keyof typeof FeedName
+>(hostname: string, provider: T, feed: S, feedResponse: string): GBFSBase {
     switch (feed) {
-        case Feed.gbfs:
+        case FeedName.gbfs:
             return getDiscoveryFeed(hostname, provider)
-        case Feed.system_information:
+        case FeedName.system_information:
             return mapSystemInformationFeed(provider, feedResponse)
-        case Feed.vehicle_types:
+        case FeedName.vehicle_types:
             return mapVehicleTypesFeed(provider, feedResponse)
-        case Feed.free_bike_status:
+        case FeedName.free_bike_status:
             return mapFreeBikeStatusFeed(provider, feedResponse)
-        case Feed.geofencing_zones:
+        case FeedName.geofencing_zones:
             return mapGeofencingZones(provider, feedResponse)
         default:
             throw new Error('Unknown feed')
@@ -157,6 +155,15 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
         baseUrl = 'https://api.staging.entur.io'
     } else {
         baseUrl = 'https://api.entur.io'
+    }
+
+    const optionalFeeds: Feed[] = []
+
+    if (provider === Provider.limeoslo) {
+        optionalFeeds.push({
+            name: 'geofencing_zones',
+            url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/geofencing_zones`,
+        })
     }
 
     return {
@@ -182,10 +189,7 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
                         name: 'system_pricing_plans',
                         url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_pricing_plans`,
                     },
-                    {
-                        name: 'geofencing_zones',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/geofencing_zones`,
-                    },
+                    ...optionalFeeds,
                 ],
             },
         },
@@ -463,13 +467,13 @@ function isProviderName(name: string): name is Provider {
     return name in Provider
 }
 
-function isFeedName(name: string): name is Feed {
-    return name in Feed
+function isFeedName(name: string): name is FeedName {
+    return name in FeedName
 }
 
 function getFeedUrl<
     T extends keyof typeof Provider,
-    S extends keyof typeof Feed
+    S extends keyof typeof FeedName
 >(provider: T, feed: S): string {
     switch (provider) {
         case Provider.voioslo:

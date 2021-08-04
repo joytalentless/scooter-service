@@ -203,9 +203,9 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
 ): SystemInformation {
     const {
         last_updated,
-        data: { name, url, timezone, rental_apps },
+        data: { system_id, name, url, timezone, rental_apps },
     }: SystemInformation = JSON.parse(feedResponse)
-    const systemId = getSystemId(provider)
+    const systemId = getSystemId(provider, system_id)
 
     return {
         last_updated,

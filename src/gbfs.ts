@@ -262,7 +262,7 @@ function mapVehicleTypesFeed<T extends keyof typeof Provider>(
                         form_factor: vehicleType.form_factor,
                         propulsion_type: vehicleType.propulsion_type,
                         max_range_meters: vehicleType.max_range_meters || 0,
-                        name: vehicleType.name || undefined
+                        name: vehicleType.name || undefined,
                     }
                 },
             ),
@@ -317,9 +317,13 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                     bike.vehicle_type_id || 'Scooter'
                 }`,
                 current_range_meters: bike.current_range_meters || 0,
-                pricing_plan_id: bike.pricing_plan_id ? `${codespace}:PricingPlan:${bike.pricing_plan_id}` : pricingPlanId,
+                pricing_plan_id: bike.pricing_plan_id
+                    ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
+                    : pricingPlanId,
                 last_reported: bike.last_reported || null,
-                station_id: bike.station_id ? `${codespace}:Station:${bike.station_id}` : null,
+                station_id: bike.station_id
+                    ? `${codespace}:Station:${bike.station_id}`
+                    : null,
                 rental_uris: bike.rental_uris ? bike.rental_uris : null,
             })),
         },
@@ -433,7 +437,10 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
     }
 }
 
-function getSystemId<T extends keyof typeof Provider>(provider: T, system_id: string | undefined): string {
+function getSystemId<T extends keyof typeof Provider>(
+    provider: T,
+    system_id: string | undefined,
+): string {
     switch (provider) {
         case Provider.voioslo:
             return 'YVO:System:voioslo'

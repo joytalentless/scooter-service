@@ -34,6 +34,7 @@ enum Provider {
     boltlillestrom = 'boltlillestrom',
     boltfredrikstad = 'boltfredrikstad',
     boltbergen = 'boltbergen',
+    moveabout = 'moveabout',
 }
 
 enum FeedName {
@@ -116,7 +117,7 @@ app.get(
                 warn('Error caught while processing feed', {
                     provider,
                     feed,
-                    error: e,
+                    error: e.stack,
                 })
                 res.status(500).send('Server error')
             }
@@ -150,11 +151,11 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
 ): GBFS {
     let baseUrl
     if (hostname === 'localhost') {
-        baseUrl = 'http://localhost:5001'
+        baseUrl = 'http://localhost:5001/entur-mobility-staging/europe-west1'
     } else if (hostname.includes('staging')) {
-        baseUrl = 'https://api.staging.entur.io'
+        baseUrl = 'https://api.staging.entur.io/mobility/v1'
     } else {
-        baseUrl = 'https://api.entur.io'
+        baseUrl = 'https://api.entur.io/mobility/v1'
     }
 
     const optionalFeeds: Feed[] = []
@@ -162,7 +163,7 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
     if (provider === Provider.limeoslo) {
         optionalFeeds.push({
             name: 'geofencing_zones',
-            url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/geofencing_zones`,
+            url: `${baseUrl}/gbfs-v2_2/${provider}/geofencing_zones`,
         })
     }
 
@@ -175,19 +176,19 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
                 feeds: [
                     {
                         name: 'system_information',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_information`,
+                        url: `${baseUrl}/gbfs-v2_2/${provider}/system_information`,
                     },
                     {
                         name: 'vehicle_types',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/vehicle_types`,
+                        url: `${baseUrl}/gbfs-v2_2/${provider}/vehicle_types`,
                     },
                     {
                         name: 'free_bike_status',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/free_bike_status`,
+                        url: `${baseUrl}/gbfs-v2_2/${provider}/free_bike_status`,
                     },
                     {
                         name: 'system_pricing_plans',
-                        url: `${baseUrl}/mobility/v1/gbfs-v2_2/${provider}/system_pricing_plans`,
+                        url: `${baseUrl}/gbfs-v2_2/${provider}/system_pricing_plans`,
                     },
                     ...optionalFeeds,
                 ],
@@ -261,6 +262,7 @@ function mapVehicleTypesFeed<T extends keyof typeof Provider>(
                         form_factor: vehicleType.form_factor,
                         propulsion_type: vehicleType.propulsion_type,
                         max_range_meters: vehicleType.max_range_meters || 0,
+                        name: vehicleType.name || undefined
                     }
                 },
             ),
@@ -306,7 +308,7 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
         version: '2.2',
         data: {
             bikes: bikes.map((bike: any) => ({
-                bike_id: `${codespace}:Scooter:${bike.bike_id}`,
+                bike_id: `${codespace}:Vehicle:${bike.bike_id}`,
                 lat: bike.lat,
                 lon: bike.lon,
                 is_reserved: bike.is_reserved === 1,
@@ -315,9 +317,9 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                     bike.vehicle_type_id || 'Scooter'
                 }`,
                 current_range_meters: bike.current_range_meters || 0,
-                pricing_plan_id: pricingPlanId,
+                pricing_plan_id: bike.pricing_plan_id ? `${codespace}:PricingPlan:${bike.pricing_plan_id}` : pricingPlanId,
                 last_reported: bike.last_reported || null,
-                station_id: null,
+                station_id: bike.station_id ? `${codespace}:Station:${bike.station_id}` : null,
                 rental_uris: bike.rental_uris ? bike.rental_uris : null,
             })),
         },
@@ -424,12 +426,14 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
         case Provider.boltlillestrom:
         case Provider.boltbergen:
             return 'YBO'
+        case Provider.moveabout:
+            return 'YMO'
         default:
             throw new Error('Unknown provider')
     }
 }
 
-function getSystemId<T extends keyof typeof Provider>(provider: T): string {
+function getSystemId<T extends keyof typeof Provider>(provider: T, system_id: string | undefined): string {
     switch (provider) {
         case Provider.voioslo:
             return 'YVO:System:voioslo'
@@ -504,6 +508,8 @@ function getFeedUrl<
             return functions
                 .config()
                 .bolt.url.bergen.replace('free_bike_status', feed)
+        case Provider.moveabout:
+            return functions.config().moveabout.url + feed + '.json'
         default:
             throw new Error('Unknown provider')
     }
@@ -526,6 +532,8 @@ async function getBearerToken<T extends keyof typeof Provider>(
             return await getBoltLillestromToken()
         case Provider.boltbergen:
             return await getBoltBergenToken()
+        case Provider.moveabout:
+            return ''
         default:
             throw new Error('Unknown provider')
     }
@@ -547,6 +555,8 @@ async function getFeed<T extends keyof typeof Provider>(
         case Provider.boltlillestrom:
         case Provider.boltbergen:
             return await getBoltFeed(feedUrl, bearerToken)
+        case Provider.moveabout:
+            return await getMoveaboutFeed(feedUrl)
         default:
             throw new Error('Unknown provider')
     }
@@ -651,6 +661,17 @@ async function getBoltToken(user: string, pass: string): Promise<string> {
         logError(Operator.BOLT, err, 'Failed to refresh session key')
         return Promise.reject()
     }
+}
+
+async function getMoveaboutFeed(feedUrl: string): Promise<string> {
+    const response: request.Response = await request
+        .get(feedUrl)
+        .auth(
+            functions.config().moveabout.api.user,
+            functions.config().moveabout.api.pass,
+        )
+        .set('Accept', 'application/json')
+    return response.text
 }
 
 export const v2_1 = functions.region('europe-west1').https.onRequest(app)

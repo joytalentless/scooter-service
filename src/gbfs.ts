@@ -35,6 +35,7 @@ enum Provider {
     boltfredrikstad = 'boltfredrikstad',
     boltbergen = 'boltbergen',
     moveabout = 'moveabout',
+    tierasker = 'tierasker',
 }
 
 enum FeedName {
@@ -517,8 +518,26 @@ function getFeedUrl<
                 .bolt.url.bergen.replace('free_bike_status', feed)
         case Provider.moveabout:
             return functions.config().moveabout.url + feed + '.json'
+        case Provider.tierasker:
+            return getTierFeedUrl(provider, feed)
         default:
             throw new Error('Unknown provider')
+    }
+}
+
+function getTierFeedUrl<
+    T extends keyof typeof Provider,
+    S extends keyof typeof FeedName
+>(provider: T, feed: S) {
+    switch (feed) {
+        case FeedName.gbfs:
+            return functions.config().tier.url[provider]
+        default:
+            return (
+                functions.config().tier.url[provider] +
+                '/' +
+                feed.replace(/_/g, '-')
+            )
     }
 }
 
@@ -540,6 +559,8 @@ async function getBearerToken<T extends keyof typeof Provider>(
         case Provider.boltbergen:
             return await getBoltBergenToken()
         case Provider.moveabout:
+            return ''
+        case Provider.tierasker:
             return ''
         default:
             throw new Error('Unknown provider')
@@ -564,6 +585,8 @@ async function getFeed<T extends keyof typeof Provider>(
             return await getBoltFeed(feedUrl, bearerToken)
         case Provider.moveabout:
             return await getMoveaboutFeed(feedUrl)
+        case Provider.tierasker:
+            return await getTierFeed(provider, feedUrl)
         default:
             throw new Error('Unknown provider')
     }
@@ -678,6 +701,19 @@ async function getMoveaboutFeed(feedUrl: string): Promise<string> {
             functions.config().moveabout.api.pass,
         )
         .set('Accept', 'application/json')
+    return response.text
+}
+
+async function getTierFeed<T extends keyof typeof Provider>(
+    provider: T,
+    feedUrl: string,
+) {
+    console.log(feedUrl)
+    const response: request.Response = await request
+        .get(feedUrl)
+        .set('Accept', 'application/json')
+        .set('x-api-key', functions.config().tier.api.gbfs)
+
     return response.text
 }
 

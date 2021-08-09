@@ -89,11 +89,12 @@ app.get(
             return
         }
 
-        if (feed == FeedName.gbfs) {
+        if (feed == FeedName.gbfs && provider !== Provider.tierasker) {
             res.status(200).send(getDiscoveryFeed(hostname, provider))
         } else if (
             feed === FeedName.vehicle_types &&
-            provider !== Provider.limeoslo
+            provider !== Provider.limeoslo &&
+            provider !== Provider.tierasker
         ) {
             res.status(200).send(getVehicleTypesFeed(provider))
         } else if (feed === FeedName.system_pricing_plans) {
@@ -132,7 +133,7 @@ function mapFeed<
 >(hostname: string, provider: T, feed: S, feedResponse: string): GBFSBase {
     switch (feed) {
         case FeedName.gbfs:
-            return getDiscoveryFeed(hostname, provider)
+            return mapDiscoveryFeed(hostname, provider, feedResponse)
         case FeedName.system_information:
             return mapSystemInformationFeed(provider, feedResponse)
         case FeedName.vehicle_types:
@@ -141,6 +142,8 @@ function mapFeed<
             return mapFreeBikeStatusFeed(provider, feedResponse)
         case FeedName.geofencing_zones:
             return mapGeofencingZones(provider, feedResponse)
+        case FeedName.system_pricing_plans:
+            return getSystemPricingPlansFeed(provider)
         default:
             throw new Error('Unknown feed')
     }
@@ -149,16 +152,9 @@ function mapFeed<
 function getDiscoveryFeed<T extends keyof typeof Provider>(
     hostname: string,
     provider: T,
+    feedUrl?: string,
 ): GBFS {
-    let baseUrl
-    if (hostname === 'localhost') {
-        baseUrl = 'http://localhost:5001/entur-mobility-staging/europe-west1'
-    } else if (hostname.includes('staging')) {
-        baseUrl = 'https://api.staging.entur.io/mobility/v1'
-    } else {
-        baseUrl = 'https://api.entur.io/mobility/v1'
-    }
-
+    const baseUrl = getBaseUrl(hostname)
     const optionalFeeds: Feed[] = []
 
     if (provider === Provider.limeoslo) {
@@ -196,6 +192,57 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
             },
         },
     }
+}
+
+function mapDiscoveryFeed<T extends keyof typeof Provider>(
+    hostname: string,
+    provider: T,
+    feedResponse: string,
+): GBFS {
+    const baseUrl = getBaseUrl(hostname)
+
+    const {
+        last_updated,
+        data: {
+            en: { feeds },
+        },
+    }: GBFS = JSON.parse(feedResponse)
+
+    return {
+        last_updated,
+        ttl: 300,
+        version: '2.2',
+        data: {
+            nb: {
+                feeds: feeds.filter(filterFeeds).map((feed) => ({
+                    name: feed.name,
+                    url: `${baseUrl}/gbfs-v2_2/${provider}/${feed.name}`,
+                })),
+            },
+        },
+    }
+}
+
+function filterFeeds(feed: Feed) {
+    return [
+        FeedName.system_information,
+        FeedName.vehicle_types,
+        FeedName.free_bike_status,
+        FeedName.system_pricing_plans,
+        FeedName.geofencing_zones,
+    ].includes(feed.name as FeedName)
+}
+
+function getBaseUrl(hostname: string) {
+    let baseUrl
+    if (hostname === 'localhost') {
+        baseUrl = 'http://localhost:5001/entur-mobility-staging/europe-west1'
+    } else if (hostname.includes('staging')) {
+        baseUrl = 'https://api.staging.entur.io/mobility/v1'
+    } else {
+        baseUrl = 'https://api.entur.io/mobility/v1'
+    }
+    return baseUrl
 }
 
 function mapSystemInformationFeed<T extends keyof typeof Provider>(
@@ -318,9 +365,10 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                     bike.vehicle_type_id || 'Scooter'
                 }`,
                 current_range_meters: bike.current_range_meters || 0,
-                pricing_plan_id: bike.pricing_plan_id
-                    ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
-                    : pricingPlanId,
+                pricing_plan_id:
+                    bike.pricing_plan_id && !isTier(provider)
+                        ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
+                        : pricingPlanId,
                 last_reported: bike.last_reported || null,
                 station_id: bike.station_id
                     ? `${codespace}:Station:${bike.station_id}`
@@ -358,6 +406,10 @@ function mapGeofencingZones<T extends keyof typeof Provider>(
 
 function isVoi<T extends keyof typeof Provider>(provider: T): boolean {
     return provider === Provider.voioslo || provider === Provider.voitrondheim
+}
+
+function isTier<T extends keyof typeof Provider>(provider: T): boolean {
+    return provider === Provider.tierasker
 }
 
 function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
@@ -433,6 +485,8 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
             return 'YBO'
         case Provider.moveabout:
             return 'YMO'
+        case Provider.tierasker:
+            return 'YTI'
         default:
             throw new Error('Unknown provider')
     }
@@ -442,24 +496,8 @@ function getSystemId<T extends keyof typeof Provider>(
     provider: T,
     system_id: string | undefined,
 ): string {
-    switch (provider) {
-        case Provider.voioslo:
-            return 'YVO:System:voioslo'
-        case Provider.voitrondheim:
-            return 'YVO:System:voitrondheim'
-        case Provider.limeoslo:
-            return 'YLI:System:limeoslo'
-        case Provider.boltoslo:
-            return 'YBO:System:boltoslo'
-        case Provider.boltfredrikstad:
-            return 'YBO:System:boltfredrikstad'
-        case Provider.boltlillestrom:
-            return 'YBO:System:boltlillestrom'
-        case Provider.boltbergen:
-            return 'YBO:System.boltbergen'
-        default:
-            throw new Error('Unknown provider')
-    }
+    const codespace = getCodespace(provider)
+    return `${codespace}:System:${system_id || provider}`
 }
 
 function getSystemPricingPlanId<T extends keyof typeof Provider>(
@@ -559,7 +597,6 @@ async function getBearerToken<T extends keyof typeof Provider>(
         case Provider.boltbergen:
             return await getBoltBergenToken()
         case Provider.moveabout:
-            return ''
         case Provider.tierasker:
             return ''
         default:

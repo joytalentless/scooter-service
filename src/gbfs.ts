@@ -35,7 +35,19 @@ enum Provider {
     boltfredrikstad = 'boltfredrikstad',
     boltbergen = 'boltbergen',
     moveabout = 'moveabout',
+    tierasane = 'tierasane',
     tierasker = 'tierasker',
+    tierbaerum = 'tierbaerum',
+    tierbergen = 'tierbergen',
+    tierdrammen = 'tierdrammen',
+    tierhaugesund = 'tierhaugesund',
+    tierlillestrom = 'tierlillestrom',
+    tierlorenskog = 'tierlorenskog',
+    tiernamsos = 'tiernamsos',
+    tieroslo = 'tieroslo',
+    tierski = 'tierski',
+    tierstavanger = 'tierstavanger',
+    tiertrondheim = 'tiertrondheim',
 }
 
 enum FeedName {
@@ -89,12 +101,12 @@ app.get(
             return
         }
 
-        if (feed == FeedName.gbfs && provider !== Provider.tierasker) {
+        if (feed == FeedName.gbfs && !isTier(provider)) {
             res.status(200).send(getDiscoveryFeed(hostname, provider))
         } else if (
             feed === FeedName.vehicle_types &&
             provider !== Provider.limeoslo &&
-            provider !== Provider.tierasker
+            !isTier(provider)
         ) {
             res.status(200).send(getVehicleTypesFeed(provider))
         } else if (feed === FeedName.system_pricing_plans) {
@@ -409,7 +421,21 @@ function isVoi<T extends keyof typeof Provider>(provider: T): boolean {
 }
 
 function isTier<T extends keyof typeof Provider>(provider: T): boolean {
-    return provider === Provider.tierasker
+    return [
+        Provider.tierasane,
+        Provider.tierasker,
+        Provider.tierbaerum,
+        Provider.tierbergen,
+        Provider.tierdrammen,
+        Provider.tierhaugesund,
+        Provider.tierlillestrom,
+        Provider.tierlorenskog,
+        Provider.tiernamsos,
+        Provider.tieroslo,
+        Provider.tierski,
+        Provider.tierstavanger,
+        Provider.tiertrondheim,
+    ].includes(provider as Provider)
 }
 
 function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
@@ -472,10 +498,15 @@ function getSystemPricing<T extends keyof typeof Provider>(
 }
 
 function getCodespace<T extends keyof typeof Provider>(provider: T): string {
+    if (isVoi(provider)) {
+        return 'YVO'
+    }
+
+    if (isTier(provider)) {
+        return 'YTI'
+    }
+
     switch (provider) {
-        case Provider.voioslo:
-        case Provider.voitrondheim:
-            return 'YVO'
         case Provider.limeoslo:
             return 'YLI'
         case Provider.boltoslo:
@@ -485,8 +516,6 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
             return 'YBO'
         case Provider.moveabout:
             return 'YMO'
-        case Provider.tierasker:
-            return 'YTI'
         default:
             throw new Error('Unknown provider')
     }
@@ -525,6 +554,10 @@ function getFeedUrl<
     T extends keyof typeof Provider,
     S extends keyof typeof FeedName
 >(provider: T, feed: S): string {
+    if (isTier(provider)) {
+        return getTierFeedUrl(provider, feed)
+    }
+
     switch (provider) {
         case Provider.voioslo:
             return functions
@@ -556,8 +589,6 @@ function getFeedUrl<
                 .bolt.url.bergen.replace('free_bike_status', feed)
         case Provider.moveabout:
             return functions.config().moveabout.url + feed + '.json'
-        case Provider.tierasker:
-            return getTierFeedUrl(provider, feed)
         default:
             throw new Error('Unknown provider')
     }
@@ -569,10 +600,20 @@ function getTierFeedUrl<
 >(provider: T, feed: S) {
     switch (feed) {
         case FeedName.gbfs:
-            return functions.config().tier.url[provider]
+            return functions
+                .config()
+                .tier.url.gbfs.replace(
+                    '%LOCATION%',
+                    provider.replace('tier', '').toUpperCase(),
+                )
         default:
             return (
-                functions.config().tier.url[provider] +
+                functions
+                    .config()
+                    .tier.url.gbfs.replace(
+                        '%LOCATION%',
+                        provider.replace('tier', '').toUpperCase(),
+                    ) +
                 '/' +
                 feed.replace(/_/g, '-')
             )
@@ -596,11 +637,8 @@ async function getBearerToken<T extends keyof typeof Provider>(
             return await getBoltLillestromToken()
         case Provider.boltbergen:
             return await getBoltBergenToken()
-        case Provider.moveabout:
-        case Provider.tierasker:
-            return ''
         default:
-            throw new Error('Unknown provider')
+            return ''
     }
 }
 
@@ -609,6 +647,9 @@ async function getFeed<T extends keyof typeof Provider>(
     feedUrl: string,
     bearerToken: string,
 ): Promise<string> {
+    if (isTier(provider)) {
+        return await getTierFeed(provider, feedUrl)
+    }
     switch (provider) {
         case Provider.voioslo:
         case Provider.voitrondheim:
@@ -622,8 +663,6 @@ async function getFeed<T extends keyof typeof Provider>(
             return await getBoltFeed(feedUrl, bearerToken)
         case Provider.moveabout:
             return await getMoveaboutFeed(feedUrl)
-        case Provider.tierasker:
-            return await getTierFeed(provider, feedUrl)
         default:
             throw new Error('Unknown provider')
     }

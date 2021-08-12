@@ -377,7 +377,9 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                 }`,
                 current_range_meters: bike.current_range_meters || 0,
                 pricing_plan_id:
-                    bike.pricing_plan_id && !isTier(provider)
+                    bike.pricing_plan_id &&
+                    !isTier(provider) &&
+                    provider !== Provider.limeoslo
                         ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
                         : pricingPlanId,
                 last_reported: bike.last_reported || null,

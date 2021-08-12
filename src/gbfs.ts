@@ -262,9 +262,9 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
 ): SystemInformation {
     const {
         last_updated,
-        data: { system_id, name, url, timezone, rental_apps },
+        data: { name, url, timezone, rental_apps },
     }: SystemInformation = JSON.parse(feedResponse)
-    const systemId = getSystemId(provider, system_id)
+    const systemId = getSystemId(provider)
 
     return {
         last_updated,
@@ -521,12 +521,8 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
     }
 }
 
-function getSystemId<T extends keyof typeof Provider>(
-    provider: T,
-    system_id: string | undefined,
-): string {
-    const codespace = getCodespace(provider)
-    return `${codespace}:System:${system_id || provider}`
+function getSystemId<T extends keyof typeof Provider>(provider: T): string {
+    return provider
 }
 
 function getSystemPricingPlanId<T extends keyof typeof Provider>(

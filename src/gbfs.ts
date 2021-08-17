@@ -22,6 +22,9 @@ import {
     boltBergenScooterPrice,
     defaultScooterPrice,
     limeScooterPrice,
+    boltDrammenScooterPrice,
+    boltSarpsborgScooterPrice,
+    boltMjosaScooterPrice,
 } from './utils/constants'
 import { ScooterPrice } from './utils/interfaces'
 import { formatDecimals } from './utils/formatters'
@@ -510,6 +513,14 @@ function getSystemPricing<T extends keyof typeof Provider>(
             return boltLillestromScooterPrice
         case Provider.boltbergen:
             return boltBergenScooterPrice
+        case Provider.boltdrammen:
+            return boltDrammenScooterPrice
+        case Provider.boltsarpsborg:
+            return boltSarpsborgScooterPrice
+        case Provider.boltgjovik:
+        case Provider.bolthamar:
+        case Provider.boltlillehammer:
+            return boltMjosaScooterPrice
         case Provider.limeoslo:
             return limeScooterPrice
         default:

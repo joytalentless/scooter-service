@@ -38,12 +38,12 @@ export const defaultScooterPrice: ScooterPrice = {
 
 export const boltOsloScooterPrice: ScooterPrice = {
     startPrice: 0,
-    pricePerMinute: 3.5,
+    pricePerMinute: 0.5,
 }
 
 export const boltLillestromScooterPrice: ScooterPrice = {
-    startPrice: 5,
-    pricePerMinute: 2.5,
+    startPrice: 0,
+    pricePerMinute: 1.0,
 }
 
 export const boltFredrikstadScooterPrice: ScooterPrice = {
@@ -53,7 +53,22 @@ export const boltFredrikstadScooterPrice: ScooterPrice = {
 
 export const boltBergenScooterPrice: ScooterPrice = {
     startPrice: 0,
-    pricePerMinute: 2.0,
+    pricePerMinute: 0.1,
+}
+
+export const boltDrammenScooterPrice: ScooterPrice = {
+    startPrice: 0,
+    pricePerMinute: 0.5,
+}
+
+export const boltSarpsborgScooterPrice: ScooterPrice = {
+    startPrice: 0,
+    pricePerMinute: 1.0,
+}
+
+export const boltMjosaScooterPrice: ScooterPrice = {
+    startPrice: 0,
+    pricePerMinute: 1.0,
 }
 
 export const limeScooterPrice: ScooterPrice = {

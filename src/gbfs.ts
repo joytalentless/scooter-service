@@ -34,6 +34,11 @@ enum Provider {
     boltlillestrom = 'boltlillestrom',
     boltfredrikstad = 'boltfredrikstad',
     boltbergen = 'boltbergen',
+    boltsarpsborg = 'boltsarpsborg',
+    boltdrammen = 'boltdrammen',
+    boltgjovik = 'boltgjovik',
+    bolthamar = 'bolthamar',
+    boltlillehammer = 'boltlillehammer',
     moveabout = 'moveabout',
     tierasane = 'tierasane',
     tierasker = 'tierasker',
@@ -438,6 +443,20 @@ function isTier<T extends keyof typeof Provider>(provider: T): boolean {
     ].includes(provider as Provider)
 }
 
+function isBolt<T extends keyof typeof Provider>(provider: T): boolean {
+    return [
+        Provider.boltbergen,
+        Provider.boltdrammen,
+        Provider.boltfredrikstad,
+        Provider.boltgjovik,
+        Provider.bolthamar,
+        Provider.boltlillehammer,
+        Provider.boltlillestrom,
+        Provider.boltoslo,
+        Provider.boltsarpsborg,
+    ].includes(provider as Provider)
+}
+
 function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
     provider: T,
 ): SystemPricingPlans {
@@ -506,19 +525,19 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
         return 'YTI'
     }
 
-    switch (provider) {
-        case Provider.limeoslo:
-            return 'YLI'
-        case Provider.boltoslo:
-        case Provider.boltfredrikstad:
-        case Provider.boltlillestrom:
-        case Provider.boltbergen:
-            return 'YBO'
-        case Provider.moveabout:
-            return 'YMO'
-        default:
-            throw new Error('Unknown provider')
+    if (isBolt(provider)) {
+        return 'YBO'
     }
+
+    if (provider === Provider.limeoslo) {
+        return 'YLI'
+    }
+
+    if (provider === Provider.moveabout) {
+        return 'YMO'
+    }
+
+    throw new Error('Unknown provider')
 }
 
 function getSystemId<T extends keyof typeof Provider>(provider: T): string {
@@ -554,6 +573,10 @@ function getFeedUrl<
         return getTierFeedUrl(provider, feed)
     }
 
+    if (isBolt(provider)) {
+        return getBoltFeedUrl(provider, feed)
+    }
+
     switch (provider) {
         case Provider.voioslo:
             return functions
@@ -567,22 +590,6 @@ function getFeedUrl<
             return functions
                 .config()
                 .lime.url.oslo_v2.replace('free_bike_status', feed)
-        case Provider.boltoslo:
-            return functions
-                .config()
-                .bolt.url.oslo.replace('free_bike_status', feed)
-        case Provider.boltfredrikstad:
-            return functions
-                .config()
-                .bolt.url.fredrikstad.replace('free_bike_status', feed)
-        case Provider.boltlillestrom:
-            return functions
-                .config()
-                .bolt.url.lillestrom.replace('free_bike_status', feed)
-        case Provider.boltbergen:
-            return functions
-                .config()
-                .bolt.url.bergen.replace('free_bike_status', feed)
         case Provider.moveabout:
             return functions.config().moveabout.url + feed + '.json'
         default:
@@ -616,23 +623,28 @@ function getTierFeedUrl<
     }
 }
 
+function getBoltFeedUrl<
+    T extends keyof typeof Provider,
+    S extends keyof typeof FeedName
+>(provider: T, feed: S) {
+    const location = provider.replace('bolt', '')
+    return functions
+        .config()
+        .bolt.url[location].replace('free_bike_status', feed)
+}
+
 async function getBearerToken<T extends keyof typeof Provider>(
     provider: T,
 ): Promise<string> {
+    if (isBolt(provider)) {
+        return await getBoltToken(provider)
+    }
     switch (provider) {
         case Provider.voioslo:
         case Provider.voitrondheim:
             return await getVoiBearerToken()
         case Provider.limeoslo:
             return await getLimeOsloToken()
-        case Provider.boltoslo:
-            return await getBoltOsloToken()
-        case Provider.boltfredrikstad:
-            return await getBoltFredrikstadToken()
-        case Provider.boltlillestrom:
-            return await getBoltLillestromToken()
-        case Provider.boltbergen:
-            return await getBoltBergenToken()
         default:
             return ''
     }
@@ -646,17 +658,18 @@ async function getFeed<T extends keyof typeof Provider>(
     if (isTier(provider)) {
         return await getTierFeed(provider, feedUrl)
     }
+
+    if (isVoi(provider)) {
+        return await getVoiFeed(feedUrl, bearerToken)
+    }
+
+    if (isBolt(provider)) {
+        return await getBoltFeed(feedUrl, bearerToken)
+    }
+
     switch (provider) {
-        case Provider.voioslo:
-        case Provider.voitrondheim:
-            return await getVoiFeed(feedUrl, bearerToken)
         case Provider.limeoslo:
             return await getLimeFeed(feedUrl, bearerToken)
-        case Provider.boltoslo:
-        case Provider.boltfredrikstad:
-        case Provider.boltlillestrom:
-        case Provider.boltbergen:
-            return await getBoltFeed(feedUrl, bearerToken)
         case Provider.moveabout:
             return await getMoveaboutFeed(feedUrl)
         default:
@@ -718,35 +731,13 @@ async function getLimeOsloToken(): Promise<string> {
     return functions.config().lime.api.token
 }
 
-async function getBoltOsloToken(): Promise<string> {
-    return await getBoltToken(
-        functions.config().bolt.api.oslo.user,
-        functions.config().bolt.api.oslo.pass,
-    )
-}
+async function getBoltToken<T extends keyof typeof Provider>(
+    provider: T,
+): Promise<string> {
+    const location = provider.replace('bolt', '')
+    const user = functions.config().bolt.api[location].user
+    const pass = functions.config().bolt.api[location].pass
 
-async function getBoltFredrikstadToken(): Promise<string> {
-    return await getBoltToken(
-        functions.config().bolt.api.fredrikstad.user,
-        functions.config().bolt.api.fredrikstad.pass,
-    )
-}
-
-async function getBoltLillestromToken(): Promise<string> {
-    return await getBoltToken(
-        functions.config().bolt.api.lillestrom.user,
-        functions.config().bolt.api.lillestrom.pass,
-    )
-}
-
-async function getBoltBergenToken(): Promise<string> {
-    return await getBoltToken(
-        functions.config().bolt.api.bergen.user,
-        functions.config().bolt.api.bergen.pass,
-    )
-}
-
-async function getBoltToken(user: string, pass: string): Promise<string> {
     console.log(
         `Refreshing ${Operator.BOLT.toLowerCase()} token with user ${user}`,
     )

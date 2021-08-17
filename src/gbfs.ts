@@ -52,6 +52,7 @@ enum Provider {
     tierski = 'tierski',
     tierstavanger = 'tierstavanger',
     tiertrondheim = 'tiertrondheim',
+    zvipptrondheim = 'zvipptrondheim',
 }
 
 enum FeedName {
@@ -537,6 +538,10 @@ function getCodespace<T extends keyof typeof Provider>(provider: T): string {
         return 'YMO'
     }
 
+    if (provider === Provider.zvipptrondheim) {
+        return 'YZV'
+    }
+
     throw new Error('Unknown provider')
 }
 
@@ -575,6 +580,10 @@ function getFeedUrl<
 
     if (isBolt(provider)) {
         return getBoltFeedUrl(provider, feed)
+    }
+
+    if (provider === Provider.zvipptrondheim) {
+        return getZvippFeedUrl(provider, feed)
     }
 
     switch (provider) {
@@ -633,21 +642,35 @@ function getBoltFeedUrl<
         .bolt.url[location].replace('free_bike_status', feed)
 }
 
+function getZvippFeedUrl<
+    T extends keyof typeof Provider,
+    S extends keyof typeof FeedName
+>(provider: T, feed: S): string {
+    const location = provider.replace('zvipp', '')
+
+    if (feed === FeedName.gbfs) {
+        return functions.config().zvipp.url[location] + '/gbfs.json'
+    } else {
+        return functions.config().zvipp.url[location] + '/1/' + feed + '.json'
+    }
+}
+
 async function getBearerToken<T extends keyof typeof Provider>(
     provider: T,
 ): Promise<string> {
+    if (isVoi(provider)) {
+        return await getVoiBearerToken()
+    }
+
     if (isBolt(provider)) {
         return await getBoltToken(provider)
     }
-    switch (provider) {
-        case Provider.voioslo:
-        case Provider.voitrondheim:
-            return await getVoiBearerToken()
-        case Provider.limeoslo:
-            return await getLimeOsloToken()
-        default:
-            return ''
+
+    if (provider === Provider.limeoslo) {
+        return await getLimeOsloToken()
     }
+    
+    return ''
 }
 
 async function getFeed<T extends keyof typeof Provider>(
@@ -672,6 +695,8 @@ async function getFeed<T extends keyof typeof Provider>(
             return await getLimeFeed(feedUrl, bearerToken)
         case Provider.moveabout:
             return await getMoveaboutFeed(feedUrl)
+        case Provider.zvipptrondheim:
+            return await getZvippFeed(feedUrl)
         default:
             throw new Error('Unknown provider')
     }
@@ -706,6 +731,11 @@ async function getBoltFeed(
         .get(feedUrl)
         .set('Authorization', `Bearer ${bearerToken}`)
         .set('Accept', 'application/json')
+    return response.text
+}
+
+async function getZvippFeed(feedUrl: string): Promise<string> {
+    const response: request.Response = await request.get(feedUrl)
     return response.text
 }
 

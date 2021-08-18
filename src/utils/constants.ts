@@ -76,6 +76,11 @@ export const limeScooterPrice: ScooterPrice = {
     pricePerMinute: 2.5,
 }
 
+export const zvippScooterPrice: ScooterPrice = {
+    startPrice: 0,
+    pricePerMinute: 2.0,
+}
+
 export const scooterPrices: priceTexts = {
     voi: formatPriceToText(
         defaultScooterPrice.startPrice,

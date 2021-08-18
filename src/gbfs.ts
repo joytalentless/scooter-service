@@ -25,6 +25,7 @@ import {
     boltDrammenScooterPrice,
     boltSarpsborgScooterPrice,
     boltMjosaScooterPrice,
+    zvippScooterPrice,
 } from './utils/constants'
 import { ScooterPrice } from './utils/interfaces'
 import { formatDecimals } from './utils/formatters'
@@ -523,6 +524,8 @@ function getSystemPricing<T extends keyof typeof Provider>(
             return boltMjosaScooterPrice
         case Provider.limeoslo:
             return limeScooterPrice
+        case Provider.zvipptrondheim:
+            return zvippScooterPrice
         default:
             return defaultScooterPrice
     }

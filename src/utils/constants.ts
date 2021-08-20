@@ -78,7 +78,7 @@ export const limeScooterPrice: ScooterPrice = {
 
 export const zvippScooterPrice: ScooterPrice = {
     startPrice: 0,
-    pricePerMinute: 2.0,
+    pricePerMinute: 2.5,
 }
 
 export const scooterPrices: priceTexts = {

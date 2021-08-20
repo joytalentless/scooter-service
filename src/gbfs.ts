@@ -683,7 +683,7 @@ async function getBearerToken<T extends keyof typeof Provider>(
     if (provider === Provider.limeoslo) {
         return await getLimeOsloToken()
     }
-    
+
     return ''
 }
 
@@ -782,9 +782,6 @@ async function getBoltToken<T extends keyof typeof Provider>(
     const user = functions.config().bolt.api[location].user
     const pass = functions.config().bolt.api[location].pass
 
-    console.log(
-        `Refreshing ${Operator.BOLT.toLowerCase()} token with user ${user}`,
-    )
     try {
         const res: request.Response = await request
             .post(`${functions.config().bolt.url.auth}`)
@@ -815,7 +812,6 @@ async function getTierFeed<T extends keyof typeof Provider>(
     provider: T,
     feedUrl: string,
 ) {
-    console.log(feedUrl)
     const response: request.Response = await request
         .get(feedUrl)
         .set('Accept', 'application/json')

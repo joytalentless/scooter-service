@@ -77,7 +77,7 @@ enum FeedName {
 
 const app = express()
 
-const lastUpdated = new Date().getTime()
+const lastUpdated = () => Math.floor(new Date().getTime() / 1000)
 
 app.get(
     '/:provider/:original?/:feed.:ext?',
@@ -186,7 +186,7 @@ function getDiscoveryFeed<T extends keyof typeof Provider>(
     }
 
     return {
-        last_updated: lastUpdated,
+        last_updated: lastUpdated(),
         ttl: 300,
         version: '2.2',
         data: {
@@ -297,7 +297,7 @@ function getVehicleTypesFeed<T extends keyof typeof Provider>(
     const codespace = getCodespace(provider)
 
     return {
-        last_updated: lastUpdated,
+        last_updated: lastUpdated(),
         ttl: 300,
         version: '2.2',
         data: {
@@ -477,7 +477,7 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
     )} kr + ${formatDecimals(pricePerMinute, 'no')} kr / min`
 
     return {
-        last_updated: lastUpdated,
+        last_updated: lastUpdated(),
         ttl: 300,
         version: '2.2',
         data: {

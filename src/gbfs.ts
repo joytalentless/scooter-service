@@ -78,6 +78,7 @@ enum FeedName {
 const app = express()
 
 const lastUpdated = () => Math.floor(new Date().getTime() / 1000)
+const MINIMUM_TTL = 30
 
 app.get(
     '/:provider/:original?/:feed.:ext?',
@@ -159,6 +160,10 @@ function mapFeed<
             return mapSystemInformationFeed(provider, feedResponse)
         case FeedName.vehicle_types:
             return mapVehicleTypesFeed(provider, feedResponse)
+        case FeedName.station_information:
+            return mapStationInformationFeed(provider, feedResponse)
+        case FeedName.station_status:
+            return mapStationStatusFeed(provider, feedResponse)
         case FeedName.free_bike_status:
             return mapFreeBikeStatusFeed(provider, feedResponse)
         case FeedName.geofencing_zones:
@@ -173,7 +178,6 @@ function mapFeed<
 function getDiscoveryFeed<T extends keyof typeof Provider>(
     hostname: string,
     provider: T,
-    feedUrl?: string,
 ): GBFS {
     const baseUrl = getBaseUrl(hostname)
     const optionalFeeds: Feed[] = []
@@ -224,6 +228,7 @@ function mapDiscoveryFeed<T extends keyof typeof Provider>(
 
     const {
         last_updated,
+        ttl,
         data: {
             en: { feeds },
         },
@@ -231,7 +236,7 @@ function mapDiscoveryFeed<T extends keyof typeof Provider>(
 
     return {
         last_updated,
-        ttl: 300,
+        ttl: ttl < MINIMUM_TTL ? MINIMUM_TTL : ttl,
         version: '2.2',
         data: {
             nb: {
@@ -248,6 +253,8 @@ function filterFeeds(feed: Feed) {
     return [
         FeedName.system_information,
         FeedName.vehicle_types,
+        FeedName.station_information,
+        FeedName.station_status,
         FeedName.free_bike_status,
         FeedName.system_pricing_plans,
         FeedName.geofencing_zones,
@@ -272,13 +279,14 @@ function mapSystemInformationFeed<T extends keyof typeof Provider>(
 ): SystemInformation {
     const {
         last_updated,
+        ttl,
         data: { name, url, timezone, rental_apps },
     }: SystemInformation = JSON.parse(feedResponse)
     const systemId = getSystemId(provider)
 
     return {
         last_updated,
-        ttl: 300,
+        ttl: ttl > MINIMUM_TTL ? ttl : MINIMUM_TTL,
         version: '2.2',
         data: {
             system_id: systemId,
@@ -321,7 +329,7 @@ function mapVehicleTypesFeed<T extends keyof typeof Provider>(
     const codespace = getCodespace(provider)
     return {
         last_updated: vehicleTypes.last_updated,
-        ttl: 300,
+        ttl: vehicleTypes.ttl > MINIMUM_TTL ? vehicleTypes.ttl : MINIMUM_TTL,
         version: '2.2',
         data: {
             vehicle_types: vehicleTypes.data.vehicle_types.map(
@@ -335,6 +343,107 @@ function mapVehicleTypesFeed<T extends keyof typeof Provider>(
                     }
                 },
             ),
+        },
+    }
+}
+
+function mapStationInformationFeed<T extends keyof typeof Provider>(
+    provider: T,
+    feedResponse: string,
+): StationInformation {
+    const stationInformation: StationInformation = JSON.parse(feedResponse)
+    const codespace = getCodespace(provider)
+
+    const mapStationFields = (station: Station) => {
+        const mappedStation: Station = {
+            ...station,
+            station_id: `${codespace}:Station:${station.station_id}`,
+        }
+
+        if (station.region_id) {
+            mappedStation.region_id = `${codespace}:Region:${station.region_id}`
+        }
+
+        if (station.vehicle_capacity) {
+            mappedStation.vehicle_capacity = Object.keys(
+                station.vehicle_capacity,
+            ).reduce((acc: any, id: string) => {
+                acc[`${codespace}:VehicleType:${id}`] =
+                    station.vehicle_capacity?.[id]
+                return acc
+            }, {})
+        }
+
+        if (station.vehicle_type_capacity) {
+            mappedStation.vehicle_type_capacity = Object.keys(
+                station.vehicle_type_capacity,
+            ).reduce((acc: any, id: string) => {
+                acc[`${codespace}:VehicleType:${id}`] =
+                    station.vehicle_type_capacity?.[id]
+                return acc
+            }, {})
+        }
+
+        return mappedStation
+    }
+
+    return {
+        ...stationInformation,
+        ttl:
+            stationInformation.ttl > MINIMUM_TTL
+                ? stationInformation.ttl
+                : MINIMUM_TTL,
+        data: {
+            stations: stationInformation.data.stations.map(mapStationFields),
+        },
+    }
+}
+
+function mapStationStatusFeed<T extends keyof typeof Provider>(
+    provider: T,
+    feedResponse: string,
+): StationStatus {
+    const stationStatus: StationStatus = JSON.parse(feedResponse)
+    const codespace = getCodespace(provider)
+
+    const mapStationFields = (station: StationStatusEntity) => {
+        const mappedStation: StationStatusEntity = {
+            ...station,
+            station_id: `${codespace}:Station:${station.station_id}`,
+        }
+
+        if (station.vehicle_types_available) {
+            mappedStation.vehicle_types_available = station.vehicle_types_available.map(
+                (vehicle_type) => {
+                    return {
+                        ...vehicle_type,
+                        vehicle_type_id: `${codespace}:VehicleType:${vehicle_type.vehicle_type_id}`,
+                    }
+                },
+            )
+        }
+
+        if (station.vehicle_docks_available) {
+            mappedStation.vehicle_docks_available = station.vehicle_docks_available.map(
+                (vehicle_dock) => {
+                    return {
+                        ...vehicle_dock,
+                        vehicle_type_ids: vehicle_dock.vehicle_type_ids.map(
+                            (id) => `${codespace}:VehicleType:${id}`,
+                        ),
+                    }
+                },
+            )
+        }
+
+        return mappedStation
+    }
+
+    return {
+        ...stationStatus,
+        ttl: stationStatus.ttl > MINIMUM_TTL ? stationStatus.ttl : MINIMUM_TTL,
+        data: {
+            stations: stationStatus.data.stations.map(mapStationFields),
         },
     }
 }
@@ -373,7 +482,8 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
 
     return {
         last_updated: freeBikeStatus.last_updated,
-        ttl: 300,
+        ttl:
+            freeBikeStatus.ttl > MINIMUM_TTL ? freeBikeStatus.ttl : MINIMUM_TTL,
         version: '2.2',
         data: {
             bikes: bikes.map((bike: any) => ({
@@ -409,7 +519,10 @@ function mapGeofencingZones<T extends keyof typeof Provider>(
     const geofencingZones: GeofencingZones = JSON.parse(feedResponse)
     return {
         last_updated: geofencingZones.last_updated,
-        ttl: 300,
+        ttl:
+            geofencingZones.ttl > MINIMUM_TTL
+                ? geofencingZones.ttl
+                : MINIMUM_TTL,
         version: '2.2',
         data: {
             geofencing_zones: {

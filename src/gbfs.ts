@@ -492,14 +492,16 @@ function mapFreeBikeStatusFeed<T extends keyof typeof Provider>(
                 lon: bike.lon,
                 is_reserved: bike.is_reserved === 1,
                 is_disabled: bike.is_disabled === 1,
-                vehicle_type_id: `${codespace}:VehicleType:${
-                    bike.vehicle_type_id || 'Scooter'
-                }`,
+                vehicle_type_id:
+                    bike.vehicle_type_id && !isBolt(provider)
+                        ? `${codespace}:VehicleType:${bike.vehicle_type_id}`
+                        : `${codespace}:VehicleType:Scooter`,
                 current_range_meters: bike.current_range_meters || 0,
                 pricing_plan_id:
                     bike.pricing_plan_id &&
                     !isTier(provider) &&
-                    provider !== Provider.limeoslo
+                    provider !== Provider.limeoslo &&
+                    !isBolt(provider)
                         ? `${codespace}:PricingPlan:${bike.pricing_plan_id}`
                         : pricingPlanId,
                 last_reported: bike.last_reported || null,

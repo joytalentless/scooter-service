@@ -81,14 +81,19 @@ export const zvippScooterPrice: ScooterPrice = {
     pricePerMinute: 2.5,
 }
 
+export const tierScooterPrice: ScooterPrice = {
+    startPrice: 0,
+    pricePerMinute: 3.0,
+}
+
 export const scooterPrices: priceTexts = {
     voi: formatPriceToText(
         defaultScooterPrice.startPrice,
         defaultScooterPrice.pricePerMinute,
     ),
     tier: formatPriceToText(
-        defaultScooterPrice.startPrice,
-        defaultScooterPrice.pricePerMinute,
+        tierScooterPrice.startPrice,
+        tierScooterPrice.pricePerMinute,
     ),
     zvipp: formatPriceToText(defaultScooterPrice.startPrice, 3),
     bolt_oslo: formatPriceToText(

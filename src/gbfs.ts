@@ -26,6 +26,7 @@ import {
     boltSarpsborgScooterPrice,
     boltMjosaScooterPrice,
     zvippScooterPrice,
+    tierScooterPrice,
 } from './utils/constants'
 import { ScooterPrice } from './utils/interfaces'
 import { formatDecimals } from './utils/formatters'
@@ -620,6 +621,10 @@ function getSystemPricingPlansFeed<T extends keyof typeof Provider>(
 function getSystemPricing<T extends keyof typeof Provider>(
     provider: T,
 ): ScooterPrice {
+    if (isTier(provider)) {
+        return tierScooterPrice
+    }
+
     switch (provider) {
         case Provider.boltoslo:
             return boltOsloScooterPrice

@@ -82,7 +82,7 @@ export const zvippScooterPrice: ScooterPrice = {
 }
 
 export const tierScooterPrice: ScooterPrice = {
-    startPrice: 0,
+    startPrice: 10,
     pricePerMinute: 3.0,
 }
 

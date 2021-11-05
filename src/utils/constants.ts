@@ -61,11 +61,6 @@ export const boltDrammenScooterPrice: ScooterPrice = {
     pricePerMinute: 2.5,
 }
 
-export const boltSarpsborgScooterPrice: ScooterPrice = {
-    startPrice: 0,
-    pricePerMinute: 1.0,
-}
-
 export const boltMjosaScooterPrice: ScooterPrice = {
     startPrice: 5,
     pricePerMinute: 2.5,

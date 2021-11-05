@@ -23,7 +23,6 @@ import {
     defaultScooterPrice,
     limeScooterPrice,
     boltDrammenScooterPrice,
-    boltSarpsborgScooterPrice,
     boltMjosaScooterPrice,
     zvippScooterPrice,
     tierScooterPrice,
@@ -39,7 +38,6 @@ enum Provider {
     boltlillestrom = 'boltlillestrom',
     boltfredrikstad = 'boltfredrikstad',
     boltbergen = 'boltbergen',
-    boltsarpsborg = 'boltsarpsborg',
     boltdrammen = 'boltdrammen',
     boltgjovik = 'boltgjovik',
     bolthamar = 'bolthamar',
@@ -574,7 +572,6 @@ function isBolt<T extends keyof typeof Provider>(provider: T): boolean {
         Provider.boltlillehammer,
         Provider.boltlillestrom,
         Provider.boltoslo,
-        Provider.boltsarpsborg,
     ].includes(provider as Provider)
 }
 
@@ -636,8 +633,6 @@ function getSystemPricing<T extends keyof typeof Provider>(
             return boltBergenScooterPrice
         case Provider.boltdrammen:
             return boltDrammenScooterPrice
-        case Provider.boltsarpsborg:
-            return boltSarpsborgScooterPrice
         case Provider.boltgjovik:
         case Provider.bolthamar:
         case Provider.boltlillehammer:

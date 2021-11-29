@@ -1,5 +1,7 @@
 # Mobility Functions
 
+__Deprecation notice: This API has been deprecated. See API documentation for more information__
+
 The Entur-Mobility app is an api that contains two endpoints.
 * `scooters` close to a user-specified location.
 * `prices` for mobility services such as scooters and city bikes.
